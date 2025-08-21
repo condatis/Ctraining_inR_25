@@ -28,13 +28,25 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, tidy = TRUE
 
 
 
-In this exercise we will perfom Condatis analyses in R, as an alternative to the [Condatis web app](https://pgb.liv.ac.uk/~condatis_dev/), to obtain some of the Condatis outputs. As an example, we will assess the  connectivity (East- West) of the wetlands in eastern England. We aim to identify the areas where habitat restoration could have the greatest positive effect for landscape connectivity.
+In this exercise we will perfom Condatis analyses in R, as an alternative to the [Condatis web app](https://pgb.liv.ac.uk/~condatis_dev/), to obtain some of the Condatis outputs. As an example, we will assess the  connectivity  of the wetlands in eastern England (East- West). We aim to identify the areas where habitat restoration could have the greatest positive effect for landscape connectivity.
 
 We will obtain the Condatis statistics, the raster layers for the _Flow_ and _Progress_ metrics, the shapefiles for the _Bottleneck links_, with their associated _power_ and _score_ metrics. Finally, we will obtain a the shapefile _**Search Areas**_, based on the score metric. 
 
-First, lets source the required functions and libraries  for the analyses. 
+## Data
+
+The data required for this exercise are in the *R example* folder of the [Workshop GitHub repository](https://github.com/condatis/Ctraining_inR_25/tree/main).
+
+Set your working directory using the path where you downloaded the 'ZIP'.
+
+```{r functions, eval=FALSE}
+
+setwd("<YOUR PTAH>/R example")
+```
 
 ### Condatis functions and R packages
+
+First, lets source the required functions and libraries  for the analyses. 
+
 In this exercise we will use the following Condatis functions:
 
 - `makehabitatpoints` 
@@ -66,9 +78,6 @@ library(sfheaders)
 library(dplyr)
 library(viridis)
 ```
-
-## Data
-
 
 ### Habitat 
 
@@ -274,7 +283,7 @@ We use the `bottleneck_ends` output from the **`results`** list (*`result$bottle
   assign(paste(landname, dirnow, "botlines",sep="_"),botlines)
   
   # save shapefile
-  st_write(botlines), paste0('outputs/',paste(landname, dirnow, "botlines",sep="_"),'.shp'))
+  st_write(botlines, paste0('outputs/',paste(landname, dirnow, "botlines",sep="_"),'.shp'))
  
 ```
 
