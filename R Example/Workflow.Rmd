@@ -36,7 +36,7 @@ We will obtain the Condatis statistics, the raster layers for the _Flow_ and _Pr
 
 The data required for this exercise are in the *R example* folder of the [Workshop GitHub repository](https://github.com/condatis/Ctraining_inR_25/tree/main).
 
-Set your working directory using the path where you downloaded the 'ZIP'.
+Set your working directory using the path where you downloaded the **ZIP**.
 
 ```{r path, eval=FALSE}
 
@@ -142,7 +142,7 @@ matches = TRUE
 
 ## Convert rasters to points
 
-We now use the `makehabitatpoints`and `stargetpt` to convert our rasters into data frames.  
+We now use the `makehabitatpoints`and `stargetpt` to convert our rasters into data frames.  The habitat dataframe (here named `Wetland_East_hab`) contains the columns required to run the Condatis analysis (i.e. x,y and cover), and obtain our output maps (xm and ym). Similarly, the `stnow` list contains, the data frames for the source and targets.  
 
 ```{r happt, eval=FALSE}
 
@@ -254,7 +254,7 @@ if(jobok){
   
 }
 ```
-You can explore these rasters in your preferred GIS software. Also, in the workshop folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the outputs with an adapted symbology. 
+You can explore these rasters in your preferred GIS software. Also, in the **ZIP** folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the outputs with an adapted symbology. 
 
 ```{r plotflowprogress, echo=FALSE}
 library(terra)
