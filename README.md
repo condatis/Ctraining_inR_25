@@ -61,4 +61,4 @@ need to create a user account for yourself at
 <https://webapp.condatis.org.uk>.
 
 ## Programme 
-In the [Workshop programme](https://github.com/condatis/Ctraining_inR_25/Programme/Programme.html), you will find a schedule and a short description of the activities planned 
+In the [Workshop programme](https://condatis.github.io/Ctrainin_inR_25/programme.html), you will find a schedule and a short description of the activities planned 
