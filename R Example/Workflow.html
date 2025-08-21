@@ -1750,8 +1750,8 @@ exercise. For details see the comments of the function
 <ul>
 <li><code>overall</code> : a dataframe with the summary of
 statistic</li>
-<li><code>flow</code>: a dataframe with the flow value per patch
-(cell)</li>
+<li><code>flow</code>: a dataframe with the flow and progress values per
+patch (cell)</li>
 <li><code>power</code>: a dataframe with the power metrics per link
 (line), i.e. percentage of power (<code>powr</code>), and score
 (<code>score</code>), among other characterstics</li>
@@ -1768,8 +1768,9 @@ results.</p>
 </div>
 <div id="progress-and-flow-maps" class="section level2">
 <h2>Progress and Flow maps</h2>
-<p>We use the <code>progress</code> and <code>flow</code> dataframes to
-rasterise the points and save these outputs as rasters.</p>
+<p>We use the <code>progress</code> and <code>flow</code> columns from
+the <code>result$flow</code> dataframe to rasterise the points and save
+these outputs as <em>.tif</em> raster files.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="cf">if</span> (jobok) {</span>
 <span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>    <span class="co"># rasterise &#39;progress&#39; points</span></span>

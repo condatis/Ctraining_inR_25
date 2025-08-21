@@ -205,7 +205,7 @@ result = condatis_from_points(
 The `condatis_from_points` funtion will return **`results`**, a list with four elements:
 
 - `overall` : a dataframe with the summary of statistic
-- `flow`: a dataframe with the flow value per patch (cell)
+- `flow`: a dataframe with the flow and progress values per patch (cell)
 - `power`: a dataframe with the power metrics per link (line), i.e. percentage of power (`powr`), and score (`score`), among other characterstics
 - `bottleneck_ends`: a dataframe with the start and end points of these links
 
@@ -219,7 +219,7 @@ If `jobok = TRUE`, we can continue to analyse our spatial results.
 
 ## Progress and Flow maps 
 
-We use the `progress` and `flow` dataframes to rasterise the points and save these outputs as rasters. 
+We use the `progress` and `flow` columns from the `result$flow` dataframe to rasterise the points and save these outputs as *.tif* raster files.
 
 ```{r maps, eval=FALSE}
 if(jobok){
