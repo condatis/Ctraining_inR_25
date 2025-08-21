@@ -38,12 +38,12 @@ The data required for this exercise are in the *R example* folder of the [Worksh
 
 Set your working directory using the path where you downloaded the 'ZIP'.
 
-```{r functions, eval=FALSE}
+```{r path, eval=FALSE}
 
 setwd("<YOUR PTAH>/R example")
 ```
 
-### Condatis functions and R packages
+## Condatis functions and R packages
 
 First, lets source the required functions and libraries  for the analyses. 
 
@@ -79,7 +79,7 @@ library(dplyr)
 library(viridis)
 ```
 
-### Habitat 
+### Habitat data
 
 First, we need to load the habitat raster, defined in our code as `eghab`. Then, we extract the spatial properties of the raster, i.e. the Coordinate Reference System (crs) and the extent. Condatis requires a raster with units in meters. If your raster is in a different linear unit or in angular units, you will have to project your raster to a crs in meters. 
 
@@ -101,7 +101,8 @@ eghab = rast("data/wetland_east.tif")
 
 plot(eghab)
 ```
-### Sources and targets
+
+### Sources and targets data
 
 In this example we will assess the East-West connectivity of our landscape. So, we must add our Source-Target raster, which we define in our code as `direction`. 
 
