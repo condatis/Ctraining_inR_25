@@ -1,6 +1,7 @@
 ---
-title: "Workflow for Condatis in R"
-author: "Jenny Hodgson" 
+title: "Condatis in R"
+
+author: "Jenny Hodgson and Claudia Gutierrez-Arellano" 
 date: '`r format(Sys.time(), "%B, %Y")`'
 
 output:
@@ -25,11 +26,39 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, tidy = TRUE
 ```
 
 
-This is an example of how to use Condatis in R
 
-```{r eval=FALSE}
 
-#Load necessary packages
+In this exercise we will perfom Condatis analyses in R, as an alternative to the [Condatis web app](https://pgb.liv.ac.uk/~condatis_dev/), to obtain some of the Condatis outputs. As an example, we will assess the  connectivity (East- West) of the wetlands in eastern England. We aim to identify the areas where habitat restoration could have the greatest positive effect for landscape connectivity.
+
+We will obtain the Condatis statistics, the raster layers for the _Flow_ and _Progress_ metrics, the shapefiles for the _Bottleneck links_, with their associated _power_ and _score_ metrics. Finally, we will obtain a the shapefile _**Search Areas**_, based on the score metric. 
+
+First, lets source the required functions and libraries  for the analyses. 
+
+### Condatis functions and R packages
+In this exercise we will use the following Condatis functions:
+
+- `makehabitatpoints` 
+Condatis runs calculations by converting each habitat patch (cell) into data points. This function converts habitat raster files into a dataframe where each patch has _xy_ coordinates (in km) and a cover value (raster values)  
+
+- `stargetpt` 
+Similar to the habitat points, we require the source and target (ST) raster to be concerted to point. This function converts the ST raster files into a dataframe where each ST patch has _xy_ coordinates (in km) with their associated raster value (0 or 1). 
+
+- `condatis_from_points`
+This function performs the core Condatis analyses, it returns the overall landscape statistics, such as Conductance, and the dataframes required to create the Flow, Progress and Bottleneck spatial layers.
+
+- `ends_to_lines`
+Bottleneck links are stored as start and end coordinates. This function will convert the Condatis output `bottleneck_ends` in a vector file that can be saved as a multi-line shapefile.
+
+The functions are in the R script stored in the 'functions' folder.
+
+```{r functions, eval=FALSE}
+
+source("functions/bottlenecks_functions.R")
+```
+
+We need the following R packages to run the Condatis function
+
+```{r libraries, eval=FALSE}
 
 library(sf)
 library(terra)
@@ -40,11 +69,22 @@ library(viridis)
 
 ## Data
 
+
 ### Habitat 
 
-Read in habitat raster data and extract the raster properties
+First, we need to load the habitat raster, defined in our code as `eghab`. Then, we extract the spatial properties of the raster, i.e. the Coordinate Reference System (crs) and the extent. Condatis requires a raster with units in meters. If your raster is in a different linear unit or in angular units, you will have to project your raster to a crs in meters. 
 
+```{r habitat, eval=TRUE}
+library(terra)
 
+eghab = rast("data/wetland_east.tif")
+
+# Obtain Coordinate Reference System (crs) and extent (ext)
+regextent = ext(eghab)
+mycrs = crs(eghab)
+myres = res(eghab)
+unitcheck = linearUnits(eghab) # returns 1 if the unit is meters
+```
 ```{r eghab, echo=FALSE}
 library(terra)
 
@@ -52,22 +92,12 @@ eghab = rast("data/wetland_east.tif")
 
 plot(eghab)
 ```
-
-```{r habitat, eval=FALSE}
-eghab = rast("data/wetland_east.tif")
-
-# Obtain Coordinate Reference System (crs) and extent (ext)
-regextent = ext(eghab)
-mycrs = crs(eghab)
-myres = res(eghab)
-unitcheck = linearUnits(eghab)
-```
 ### Sources and targets
 
-Source and target raster description
+In this example we will assess the East-West connectivity of our landscape. So, we must add our Source-Target raster, which we define in our code as `direction`. 
 
 ```{r ST, eval=FALSE}
-direction = rast("east_W_E.tif")
+direction = rast("data/east_W_E.tif")
 
 ```
 
@@ -80,21 +110,212 @@ plot(eghab, legend = FALSE)
 plot(direction, add=TRUE)
 ```
 
+We can verify that our habitat and ST raster have the same spatial properties. Then name our ST raster accordingly. Defining `landname` and `dirnow` facilitates the reproducibility of the code for other landscapes or directions. 
+
+```{r check, echo=TRUE, message=TRUE}
+landname = 'Wetland_East'  
+dirnow = 'W_E'
+
+matches = TRUE
+  if(!identical(myres,res(direction))){
+    matches = FALSE
+    warning(paste("habitat has different resolution from st in direction",direction))
+  }
+  if(!identical(unitcheck,linearUnits(direction))){
+    matches = FALSE
+    warning(paste("habitat has different distance unit from st in direction", direction))
+  }
+  if(matches){message(paste("st matches habitat in direction",dirnow))}
+  assign(paste0(landname,"_",dirnow),direction)
+
+```
+
 ## Convert rasters to points
 
-## Run Condatis
+We now use the `makehabitatpoints`and `stargetpt` to convert our rasters into data frames.  
 
-### Load functions
+```{r happt, eval=FALSE}
+
+# Name habitat according to variable 'landname' and convert raster to points
+assign(paste0(landname,"_hab"),makehabitatpoints(eghab,inm=identical(unitcheck,1)))
+
+# Get source and target points
+stnow = stargetpt(get(paste0(landname,"_",dirnow)),inm=identical(unitcheck,1)) 
+
+```
+## Run Condatis
 
 ### Set Condatis parameters
 
+The user-defined inputs required for the Condatis function are:
+
+ - The habitat (`habpt`) and source-target (`sourcept`, `targetpt`) points obtained above. 
+ 
+ - A dispersal distance in km (`disp`). Here we will use a 2 km dispersal distance.
+ 
+ - Cell side (`cellside`). We calculate the cell size in kilometers based on the resolution of the habitat raster, we named this `myres` above. If the raster units are not meter, the cellside will not be converted to km. 
+ 
+ - Reproductive rate (`R`). This represent the average number of individuals produced per generation per km^2^. Here we set R to 1000.
+ 
+ Other parameters have default values, we will not modify them in this exercise. For details see the comments of the function `condatis_from_points`. 
+ 
+
+```{r param, eval=FALSE}
+
+Cdisp = 2
+
+if(identical(unitcheck,1)){
+Ccellside = myres[1]/1000 #resolution in m, cellside in km
+}else{
+  Ccellside= myres[1]# units left unchanged if they are not in m, as within raster to point conversions
+}
+```
+
 ### Run analysis
 
-## Flow
+Now we can run the Condatis analysis. 
 
-## Progress
+```{r condatis, eval=FALSE}
+result = condatis_from_points(
+  habpt= get(paste0(landname,"_hab")), # habitat points
+  sourcept=stnow$sourcept[,c("x","y")], # source points
+  targetpt=stnow$targetpt[,c("x","y")], # target points
+  R=1000, 
+  disp = Cdisp, 
+  cellside = Ccellside, 
+  metric ='ALL',   
+  filename =  NA, 
+  threshold = 0.95, 
+  minscore=1, 
+  maxlink = 50000, 
+  minlink = 1,
+  maxdisp = Inf)
+```
+
+The `condatis_from_points` funtion will return **`results`**, a list with four elements:
+
+- `overall` : a dataframe with the summary of statistic
+- `flow`: a dataframe with the flow value per patch (cell)
+- `power`: a dataframe with the power metrics per link (line), i.e. percentage of power (`powr`), and score (`score`), among other characterstics
+- `bottleneck_ends`: a dataframe with the start and end points of these links
+
+We can check for unusual 'voltages' indicating computational errors. 
+
+```{r test, eval=FALSE}
+  jobok= result$overall$minprog > (0-10^-6)
+  jobok= jobok & result$overall$maxprog < (1+10^-6) 
+```
+If `jobok = TRUE`, we can continue to analyse our spatial results.  
+
+## Progress and Flow maps 
+
+We use the `progress` and `flow` dataframes to rasterise the points and save these outputs as rasters. 
+
+```{r maps, eval=FALSE}
+if(jobok){
+ 
+  # rasterise 'progress' points
+    progress = rast(result$flow[,c("xm","ym","progress")],
+              type="xyz",
+              crs=mycrs, 
+              digits=1, 
+              extent=regextent)
+  
+  assign(paste(landname, dirnow, "progress",sep="_"),
+         progress)
+  
+  dir.create('outputs') #create an outputs folder
+  
+  # save raster
+   writeRaster(progress, paste0('outputs/', paste(landname, dirnow, "progress",sep="_"),'.tif'), datatype = "FLT8S",overwrite = TRUE) 
+  
+   # rasterise 'flow' points 
+   flow = rast(result$flow[,c("xm","ym","flow")],
+              type="xyz",
+              crs=mycrs, 
+              digits=1,
+              extent=regextent)
+ 
+ 
+   assign(paste(landname, dirnow, "flow",sep="_"),
+          flow)
+   # save raster
+   writeRaster(flow, paste0('outputs/', paste(landname, dirnow, "flow",sep="_"),'.tif'), datatype = "FLT8S",overwrite = TRUE) 
+  
+}
+```
+You can explore these rasters in your preferred GIS software. Also, in the workshop folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the outputs with an adapted symbology. 
+
+```{r plotflowprogress, echo=FALSE}
+library(terra)
+landname = 'Wetland_East'  
+dirnow = 'W_E'
+progress = rast('QGIS_project/Wetland_East_W_E_progress.tif')
+flow = rast('QGIS_project/Wetland_East_W_E_flow.tif')
+par(mfrow = c(1, 2))
+plot(progress,main = 'Progress')
+plot(log10(flow) , main = expression( ~ log[10]~ Flow))
+```
 
 ## Bottleneck lines
 
+We use the `bottleneck_ends` output from the **`results`** list (*`result$bottleneck_ends`*) as the input for the `ends_to_lines` function . Then we save the results as a shapefile in the outputs folder you just created. 
+
+```{r botlines, eval=FALSE}
+
+  ends = result$bottleneck_ends
+  
+  ends$direction = dirnow # add the direction
+  
+  botlines = ends_to_lines(endstab=ends,
+                           minscore=1,
+                           crs=mycrs)
+  
+  assign(paste(landname, dirnow, "botlines",sep="_"),botlines)
+  
+  # save shapefile
+  st_write(botlines), paste0('outputs/',paste(landname, dirnow, "botlines",sep="_"),'.shp'))
+ 
+```
+
+
+
 ## Search areas
 
+
+
+
+<style>
+.copy-btn {
+  float: right;
+  margin: 5px;
+  padding: 2px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: #f9f9f9;
+}
+.copy-btn:hover {
+  background: #e0e0e0;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll("pre code").forEach(function(codeBlock) {
+    var button = document.createElement("button");
+    button.innerHTML = "Copy";
+    button.className = "copy-btn";
+
+    var pre = codeBlock.parentNode;
+    pre.parentNode.insertBefore(button, pre);
+
+    button.addEventListener("click", function() {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      button.innerHTML = "Copied!";
+      setTimeout(function(){ button.innerHTML = "Copy"; }, 2000);
+    });
+  });
+});
+</script>
