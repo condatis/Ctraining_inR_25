@@ -1,0 +1,55 @@
+---
+title: "Condatis Workshop Programme"
+author: "Jenny Hodgson" 
+date: '`r format(Sys.time(), "%B, %Y")`'
+
+output:
+  html_document: 
+    collapsed: false
+    theme: journal
+    highlight: kate
+    toc: true
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+  github_document:
+    toc: yes
+    toc_depth: 4
+    html_preview: TRUE
+
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Schedule
+
+### Session 1
+
+ - 11:20 — 11:45 Introduction to Condatis
+ - 11:45 — 12:00 Web App tour 
+ - 12:00 — 12:40 Exercises and Q&A
+ - 12:00 — 12:50 Condatis Bottlenecks
+ 
+### Session 2
+
+ - 14:50 — 15:50 Condatis Exercise in R
+ - 15:50 — 16:10 Explore Condatis Outputs in GIS
+ - 16:10 — 16:25 Q&A 
+ - 16:25 — 16:50 Potential application in your research
+
+## Activities summary and material
+
+### Session 1. Condatis Web App
+
+_Prioritisation in Borneo_
+
+In this exercise we will use  [Condatis Web App](https://pgb.liv.ac.uk/~condatis_dev/) to ...
+
+Download the data this exercise [here]() 
+
+
+### Session 2. Condatis R
+
+_Wetland connectivity in Eastern England_
