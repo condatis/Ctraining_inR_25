@@ -43,13 +43,25 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Session 1. Condatis Web App
 
+_Introduction to Condatis_
+
+descritption slides(link)
+
 _Prioritisation in Borneo_
 
 In this exercise we will use  [Condatis Web App](https://pgb.liv.ac.uk/~condatis_dev/) to ...
 
-Download the data this exercise [here]() 
+Download the data for this exercise [here](https://github.com/condatis/Ctraining_inR_25/tree/main) (update link to final version)
 
 
 ### Session 2. Condatis R
 
 _Wetland connectivity in Eastern England_
+
+In this exercise we will use R to explore the occurrence of bottlenecks for the wetlands in the east of England.
+
+Download the data for this exercise here (update link to final version)
+
+You can explore the outputs in this [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example/QGIS_project) (update), by opening the *Condatis_Wetland_East.qgz* in QGIS, or load the layers in your preferred GIS software.
+
+
