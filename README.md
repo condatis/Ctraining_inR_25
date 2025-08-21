@@ -59,3 +59,6 @@ analysis and not just for its GIS capability). Please install R version
 sfheaders, tidyverse and viridis. Before using the Condatis web app, you
 need to create a user account for yourself at
 <https://webapp.condatis.org.uk>.
+
+## Programme 
+In the [Workshop programme](), you will find a schedule and a short description of the activities planned 
