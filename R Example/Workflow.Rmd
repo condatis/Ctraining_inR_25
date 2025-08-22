@@ -18,19 +18,15 @@ output:
     toc: yes
     toc_depth: 4
     html_preview: TRUE
-
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, tidy = TRUE) 
 ```
 
+In this exercise we will perfom Condatis analyses in R, as an alternative to the [Condatis web app](https://pgb.liv.ac.uk/~condatis_dev/), to obtain some of the Condatis outputs. As an example, we will assess the connectivity of the wetlands in eastern England (East- West). We aim to identify the areas where habitat restoration could have the greatest positive effect for landscape connectivity.
 
-
-
-In this exercise we will perfom Condatis analyses in R, as an alternative to the [Condatis web app](https://pgb.liv.ac.uk/~condatis_dev/), to obtain some of the Condatis outputs. As an example, we will assess the  connectivity  of the wetlands in eastern England (East- West). We aim to identify the areas where habitat restoration could have the greatest positive effect for landscape connectivity.
-
-We will obtain the Condatis statistics, the raster layers for the _Flow_ and _Progress_ metrics, the shapefiles for the _Bottleneck links_, with their associated _power_ and _score_ metrics. Finally, we will obtain a the shapefile _**Search Areas**_, based on the score metric. 
+We will obtain the Condatis statistics, the raster layers for the *Flow* and *Progress* metrics, the shapefiles for the *Bottleneck links*, with their associated *power* and *score* metrics. Finally, we will obtain a the shapefile ***Search Areas***, based on the score metric.
 
 ## Data
 
@@ -45,21 +41,17 @@ setwd("<YOUR PTAH>/R example")
 
 ## Condatis functions and R packages
 
-First, lets source the required functions and libraries  for the analyses. 
+First, lets source the required functions and libraries for the analyses.
 
 In this exercise we will use the following Condatis functions:
 
-- `makehabitatpoints` 
-Condatis runs calculations by converting each habitat patch (cell) into data points. This function converts habitat raster files into a dataframe where each patch has _xy_ coordinates (in km) and a cover value (raster values)  
+-   `makehabitatpoints` Condatis runs calculations by converting each habitat patch (cell) into data points. This function converts habitat raster files into a dataframe where each patch has *xy* coordinates (in km) and a cover value (raster values)
 
-- `stargetpt` 
-Similar to the habitat points, we require the source and target (ST) raster to be concerted to point. This function converts the ST raster files into a dataframe where each ST patch has _xy_ coordinates (in km) with their associated raster value (0 or 1). 
+-   `stargetpt` Similar to the habitat points, we require the source and target (ST) raster to be converted to point. This function converts the ST raster files into a dataframe where each ST patch has *xy* coordinates (in km) with their associated raster value (1 or 2).
 
-- `condatis_from_points`
-This function performs the core Condatis analyses, it returns the overall landscape statistics, such as Conductance, and the dataframes required to create the Flow, Progress and Bottleneck spatial layers.
+-   `condatis_from_points` This function performs the core Condatis analyses, it returns the overall landscape statistics, such as Conductance, and the dataframes required to create the Flow, Progress and Bottleneck spatial layers.
 
-- `ends_to_lines`
-Bottleneck links are stored as start and end coordinates. This function will convert the Condatis output `bottleneck_ends` in a vector file that can be saved as a multi-line shapefile.
+-   `ends_to_lines` Bottleneck links are stored as start and end coordinates. This function will convert the Condatis output `bottleneck_ends` in a vector file that can be saved as a multi-line shapefile.
 
 The functions are in the R script stored in the 'functions' folder.
 
@@ -81,7 +73,7 @@ library(viridis)
 
 ### Habitat data
 
-First, we need to load the habitat raster, defined in our code as `eghab`. Then, we extract the spatial properties of the raster, i.e. the Coordinate Reference System (crs) and the extent. Condatis requires a raster with units in meters. If your raster is in a different linear unit or in angular units, you will have to project your raster to a crs in meters. 
+First, we need to load the habitat raster, defined in our code as `eghab`. Then, we extract the spatial properties of the raster, i.e. the Coordinate Reference System (crs) and the extent. Condatis requires a raster with units in meters. If your raster is in a different linear unit or in angular units, you will have to project your raster to a crs in meters.
 
 ```{r habitat, eval=TRUE}
 library(terra)
@@ -94,6 +86,7 @@ mycrs = crs(eghab)
 myres = res(eghab)
 unitcheck = linearUnits(eghab) # returns 1 if the unit is meters
 ```
+
 ```{r eghab, echo=FALSE}
 library(terra)
 
@@ -104,7 +97,7 @@ plot(eghab)
 
 ### Sources and targets data
 
-In this example we will assess the East-West connectivity of our landscape. So, we must add our Source-Target raster, which we define in our code as `direction`. 
+In this example we will assess the East-West connectivity of our landscape. So, we must add our Source-Target raster, which we define in our code as `direction`.
 
 ```{r ST, eval=FALSE}
 direction = rast("data/east_W_E.tif")
@@ -120,7 +113,7 @@ plot(eghab, legend = FALSE)
 plot(direction, add=TRUE)
 ```
 
-We can verify that our habitat and ST raster have the same spatial properties. Then name our ST raster accordingly. Defining `landname` and `dirnow` facilitates the reproducibility of the code for other landscapes or directions. 
+We can verify that our habitat and ST raster have the same spatial properties. Then name our ST raster accordingly. Defining `landname` and `dirnow` facilitates the reproducibility of the code for other landscapes or directions.
 
 ```{r check, echo=TRUE, message=TRUE}
 landname = 'Wetland_East'  
@@ -142,7 +135,7 @@ matches = TRUE
 
 ## Convert rasters to points
 
-We now use the `makehabitatpoints`and `stargetpt` to convert our rasters into data frames.  The habitat dataframe (here named `Wetland_East_hab`) contains the columns required to run the Condatis analysis (i.e. x,y and cover), and obtain our output maps (xm and ym). Similarly, the `stnow` list contains, the data frames for the source and targets.  
+We now use the `makehabitatpoints`and `stargetpt` to convert our rasters into data frames. The habitat dataframe (here named `Wetland_East_hab`) contains the columns required to run the Condatis analysis (i.e. x,y and cover), and obtain our output maps (xm and ym). Similarly, the `stnow` list contains, the data frames for the source and targets.
 
 ```{r happt, eval=FALSE}
 
@@ -153,22 +146,22 @@ assign(paste0(landname,"_hab"),makehabitatpoints(eghab,inm=identical(unitcheck,1
 stnow = stargetpt(get(paste0(landname,"_",dirnow)),inm=identical(unitcheck,1)) 
 
 ```
+
 ## Run Condatis
 
 ### Set Condatis parameters
 
 The user-defined inputs required for the Condatis function are:
 
- - The habitat (`habpt`) and source-target (`sourcept`, `targetpt`) points obtained above. 
- 
- - A dispersal distance in km (`disp`). Here we will use a 2 km dispersal distance.
- 
- - Cell side (`cellside`). We calculate the cell size in kilometers based on the resolution of the habitat raster, we named this `myres` above. If the raster units are not meter, the cellside will not be converted to km. 
- 
- - Reproductive rate (`R`). This represent the average number of individuals produced per generation per km^2^. Here we set R to 1000.
- 
- Other parameters have default values, we will not modify them in this exercise. For details see the comments of the function `condatis_from_points`. 
- 
+-   The habitat (`habpt`) and source-target (`sourcept`, `targetpt`) points obtained above.
+
+-   A dispersal distance in km (`disp`). Here we will use a 2 km dispersal distance.
+
+-   Cell side (`cellside`). We calculate the cell size in kilometers based on the resolution of the habitat raster, we named this `myres` above. If the raster units are not meter, the cellside will not be converted to km.
+
+-   Reproductive rate (`R`). This represent the average number of individuals produced per generation per km^2^. Here we set R to 1000.
+
+Other parameters have default values, we will not modify them in this exercise. For details see the comments of the function `condatis_from_points`.
 
 ```{r param, eval=FALSE}
 
@@ -183,7 +176,7 @@ Ccellside = myres[1]/1000 #resolution in m, cellside in km
 
 ### Run analysis
 
-Now we can run the Condatis analysis. 
+Now we can run the Condatis analysis.
 
 ```{r condatis, eval=FALSE}
 result = condatis_from_points(
@@ -204,20 +197,21 @@ result = condatis_from_points(
 
 The `condatis_from_points` funtion will return **`results`**, a list with four elements:
 
-- `overall` : a dataframe with the summary of statistic
-- `flow`: a dataframe with the flow and progress values per patch (cell)
-- `power`: a dataframe with the power metrics per link (line), i.e. percentage of power (`powr`), and score (`score`), among other characterstics
-- `bottleneck_ends`: a dataframe with the start and end points of these links
+-   `overall` : a dataframe with the summary of statistic
+-   `flow`: a dataframe with the flow and progress values per patch (cell)
+-   `power`: a dataframe with the power metrics per link (line), i.e. percentage of power (`powr`), and score (`score`), among other characterstics
+-   `bottleneck_ends`: a dataframe with the start and end points of these links
 
-We can check for unusual 'voltages' indicating computational errors. 
+We can check for unusual 'voltages' indicating computational errors.
 
 ```{r test, eval=FALSE}
   jobok= result$overall$minprog > (0-10^-6)
   jobok= jobok & result$overall$maxprog < (1+10^-6) 
 ```
-If `jobok = TRUE`, we can continue to analyse our spatial results.  
 
-## Progress and Flow maps 
+If `jobok = TRUE`, we can continue to analyse our spatial results.
+
+## Progress and Flow maps
 
 We use the `progress` and `flow` columns from the `result$flow` dataframe to rasterise the points and save these outputs as *.tif* raster files.
 
@@ -254,7 +248,8 @@ if(jobok){
   
 }
 ```
-You can explore these rasters in your preferred GIS software. Also, in the **ZIP** folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the outputs with an adapted symbology. 
+
+You can explore these rasters in your preferred GIS software. Also, in the **ZIP** folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the outputs with an adapted symbology.
 
 ```{r plotflowprogress, echo=FALSE}
 library(terra)
@@ -269,7 +264,7 @@ plot(log10(flow) , main = expression( ~ log[10]~ Flow))
 
 ## Bottleneck lines
 
-We use the `bottleneck_ends` output from the **`results`** list (*`result$bottleneck_ends`*) as the input for the `ends_to_lines` function . Then we save the results as a shapefile in the outputs folder you just created. 
+We use the `bottleneck_ends` output from the **`results`** list (*`result$bottleneck_ends`*) as the input for the `ends_to_lines` function . Then we save the results as a shapefile in the outputs folder you just created.
 
 ```{r botlines, eval=FALSE}
 
@@ -288,13 +283,9 @@ We use the `bottleneck_ends` output from the **`results`** list (*`result$bottle
  
 ```
 
-
-
 ## Search areas
 
-
-
-
+```{=html}
 <style>
 .copy-btn {
   float: right;
@@ -310,7 +301,9 @@ We use the `bottleneck_ends` output from the **`results`** list (*`result$bottle
   background: #e0e0e0;
 }
 </style>
+```
 
+```{=html}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   document.querySelectorAll("pre code").forEach(function(codeBlock) {
@@ -329,3 +322,4 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 });
 </script>
+```
