@@ -1,10 +1,14 @@
 ---
+title: "Condatis in R 2025 (Ctraining_inR_25)"
+author: "Jenny Hodgson and Claudia Gutierrez-Arellano" 
+
+output:
+  html_document: 
+  
 editor_options: 
   markdown: 
     wrap: 72
 ---
-
-# Condatis training in R 2025 (Ctraining_inR_25)
 
 *Training first delivered in September 2025, by Jenny Hodgson and
 Claudia Gutierrez-Arellano*
@@ -17,7 +21,7 @@ button that says "\<\> Code" to reveal a short menu, and then choose
 "Download ZIP". You can unzip the download anywhere that's convenient on
 your own computer.
 
-## Session summary
+## Session summary - Condatis connectivity analysis to plan resilient habitat networks
 
 Condatis is decision support software to identify the best locations for
 habitat restoration to increase connectivity across landscapes. It can
@@ -60,5 +64,18 @@ sfheaders, tidyverse and viridis. Before using the Condatis web app, you
 need to create a user account for yourself at
 <https://webapp.condatis.org.uk>.
 
-## Programme 
-In the [Workshop programme](https://condatis.github.io/Ctrainin_inR_25/programme.html), you will find a schedule and a short description of the activities planned 
+## Programme
+
+In the [Workshop
+programme](https://condatis.github.io/Ctraining_inR_25/), you will find
+a schedule and a short description of the activities planned
+
+## Copyright
+
+Please note that we are making this code and documentation available
+under a GPL license; for more details see the LICENSE file. Copyright
+Jenny Hodgson and Claudia Gutierrez-Arellano 2025 unless otherwise
+stated (e.g. datasets). Please cite this archive as Jenny Hodgson and
+Claudia Gutierrez-Arellano (2025) Condatis connectivity analysis to plan
+resilient habitat networks - Condatis training in R. Available at:
+<https://github.com/condatis/Ctraining_inR_25>.

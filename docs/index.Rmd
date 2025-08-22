@@ -38,7 +38,9 @@ knitr::opts_chunk$set(echo = TRUE)
 -   15:50 — 16:10 Recap, Q&A and requests
 -   16:10 — 16:20 According to requests, either explore Condatis outputs further in GIS, or discuss applications for your own work
 
-## Links to materials
+## Links to materials[^1]
+
+[^1]: Please note that we are making this code and documentation available under a GPL license; for more details see the LICENSE file. Copyright Jenny Hodgson and Claudia Gutierrez-Arellano 2025 unless otherwise stated (e.g. datasets). Please cite this archive as Jenny Hodgson and Claudia Gutierrez-Arellano (2025) Condatis connectivity analysis to plan resilient habitat networks - Condatis training in R. Available at: <https://github.com/condatis/Ctraining_inR_25>
 
 ### Finding the data
 
@@ -48,11 +50,11 @@ Data for both our exercises are included in the Github repository here. It is si
 
 Download presentation slides with introduction to Condatis and the Sabah exercise (link)
 
-View quick reference document for the Sabah exercise (link)
+View quick reference document for the Sabah exercise ([Web_app_quick_reference.pdf](https://condatis.github.io/Ctraining_inR_25/Web_app_quick_reference.pdf))
 
 Direct link to the [Condatis Web App](https:webapp.condatis.org.uk)
 
-Read the full web app help documentation (link)
+Read the full [web app help documentation](https://webapp.condatis.org.uk/help/help.html) 
 
 ### Session 2. Condatis R
 
@@ -61,3 +63,19 @@ Read the full web app help documentation (link)
 In this exercise we will use R to explore the occurrence of bottlenecks for the wetlands in the east of England.
 
 You can explore the outputs in this [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example/QGIS_project) (update), by opening the *Condatis_Wetland_East.qgz* in QGIS, or load the layers in your preferred GIS software.
+
+## Session summary - Condatis connectivity analysis to plan resilient habitat networks
+
+Condatis is decision support software to identify the best locations for habitat restoration to increase connectivity across landscapes. It can help planners to find multiple-win solutions for land management, so that biodiversity can recover and natural ecosystems can co-exist with human activities. Condatis’s metric of long-distance connectivity is particularly relevant under climate change, ensuring that networks of habitat facilitate range shifts. Condatis:
+
+1.  Highlights pathways across a landscape that allow both dispersal and reproduction of species;
+
+2.  Pinpoints bottlenecks in the habitat network, where there are restricted opportunities for colonisation, and where restoration would be most impactful;
+
+3.  Ranks the feasible sites for habitat restoration, to efficiently enhance the existing habitat network.
+
+Condatis has been developed since 2015 and has been used by conservation practitioners around the world, via its web application ([www.condatis.org.uk](www.condatis.org.uk)). Through collaboration with users, we have designed it to be fast and user-friendly, and to work with the kind of data that organisations typically have. This workshop will provide a brief overview of the software and a series of graded exercises, showcasing the different functions of Condatis.
+
+## Background requirements
+
+There will be examples using the Condatis web app as well as the R environment. Attendees will need some familiarity with GIS, e.g. reading, writing and querying raster data. You may use your own favoured GIS software or spatial package to view our input and output data, either R, ArcGIS Pro or QGIS. It may be advisable to update your GIS package to the latest version. We will not be offering in-depth GIS help during the session. R is essential for one of our exercises (for the analysis and not just for its GIS capability). Please install R version 4.3 or later before you start, and install the packages terra, sf, sfheaders, tidyverse and viridis. Before using the Condatis web app, you need to create a user account for yourself at <https://webapp.condatis.org.uk>.
