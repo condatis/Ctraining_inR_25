@@ -62,7 +62,7 @@ Read the full [web app help documentation](https://webapp.condatis.org.uk/help/h
 
 In this exercise we will use R to explore the occurrence of bottlenecks for the wetlands in the east of England.
 
-You can explore the outputs in this [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example/QGIS_project) (update), by opening the *Condatis_Wetland_East.qgz* in QGIS, or load the layers in your preferred GIS software.
+You can explore the outputs in this [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example/QGIS_project), by opening the *Condatis_Wetland_East.qgz* in QGIS, or load the layers in your preferred GIS software.
 
 ## Session summary - Condatis connectivity analysis to plan resilient habitat networks
 
