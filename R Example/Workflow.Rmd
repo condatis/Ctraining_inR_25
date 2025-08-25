@@ -53,6 +53,8 @@ In this exercise we will use the following Condatis functions:
 
 -   `ends_to_lines` Bottleneck links are stored as start and end coordinates. This function will convert the Condatis output `bottleneck_ends` in a vector file that can be saved as a multi-line shapefile.
 
+- `zones_by_score_range` Each of the bottleneck links has a _'score'_ associated. This function selects those bottlenecks with a user-defined score threshold that specify the value for *major* and *severe* bottleneck. Then, the midpoint of a link is identified to create a buffer of half its length, resulting in a circular polygon with a diameter of the bottleneck length. 
+
 The functions are in the R script stored in the 'functions' folder.
 
 ```{r functions, eval=FALSE}
@@ -213,7 +215,7 @@ If `jobok = TRUE`, we can continue to analyse our spatial results.
 
 ## Progress and Flow maps
 
-We use the `progress` and `flow` columns from the `result$flow` dataframe to rasterise the points and save these outputs as *.tif* raster files.
+We use the `progress` and `flow` columns from the `result$flow` dataframe to rasterise the points and save these outputs as *.tif* raster files in an 'outputs' folder you will create.
 
 ```{r maps, eval=FALSE}
 if(jobok){
@@ -284,7 +286,71 @@ We use the `bottleneck_ends` output from the **`results`** list (*`result$bottle
 ```
 
 ## Search areas
+Finaly, we can use the bottleneck links that we created above (`botlines`) to define 'Search areas' based on the bottleneck scores. 
 
+In this example, we set the 'major' bottleneck areas defined by any links with a score between 5 and 50, and 'severe' bottleneck areas with a score greater than 50.
+
+At the end of this section we combined the `areasMajor` and `areasSevere` outputs into a single dataset `areas`.
+
+```{r search, eval=FALSE}
+
+majorscore = 5
+severescore = 50
+
+areasMajor = zones_by_score_range(
+  botlines, 
+  score_range = c(majorscore,severescore),
+  directioncol="direction")
+
+areasSevere = zones_by_score_range(
+  botlines, 
+  score_range = c(severescore,Inf),
+  directioncol="direction")
+
+if(!identical(areasMajor,NA)){   # The  zones_by_score_range function will return NA if there are no lines in the specified score range        
+  areasMajor$category = "Major"
+  
+  if(!identical(areasSevere, NA)){ 
+    areasSevere$category = "Severe"
+    areas = dplyr::bind_rows(areasMajor, areasSevere)      
+    
+  } else{
+    areas = areasMajor
+    
+  }
+}  
+
+# Save shapefile of major and severe bottleneck areas
+st_write(areas, paste0('outputs/',paste(landname, dirnow, "areas",sep="_"),'.shp'), append=FALSE)
+
+```
+
+Your shapefile will compile the areas categorised as 'major' or 'severe', the number of bottlenecks that are included in that areas and the sum of their scores.
+
+```{r areas, echo=FALSE, message=FALSE, warning=FALSE}
+library(sf)
+library(terra)
+
+# Load data
+areas = st_read("outputs/Wetland_East_W_E_areas.shp", quiet = TRUE)
+eghab = rast("data/wetland_east.tif")
+
+# Colors
+cats = unique(areas$category)
+cols = c("Major" = "pink", "Severe" = "purple")
+cols[setdiff(cats, names(cols))] = "gray"  # default for missing categories
+
+# Adjust margins for legend
+par(mar = c(4, 4, 2, 6))
+
+# Plot
+plot(eghab, legend = FALSE)
+plot(areas, col = cols[areas$category], add = TRUE)
+legend("topright", legend = names(cols), fill = cols, title = "Category", xpd = TRUE, bty = "n")
+    
+
+```
+Now you can explore this shapefile in your preferred GIS software. As mentioned above, in the **ZIP** folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the rasters and shapefiles we obtained in this exercise.
 ```{=html}
 <style>
 .copy-btn {
