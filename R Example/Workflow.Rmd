@@ -24,7 +24,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, tidy = TRUE) 
 ```
 
-In this exercise we will perfom Condatis analyses in R, as an alternative to the [Condatis web app](https://pgb.liv.ac.uk/~condatis_dev/), to obtain some of the Condatis outputs. As an example, we will assess the connectivity of the wetlands in eastern England (East- West). We aim to identify the areas where habitat restoration could have the greatest positive effect for landscape connectivity.
+In this exercise we will perfom Condatis analyses in R. As an example, we will assess the connectivity of the wetlands in eastern England. We aim to identify the areas where habitat restoration could have the greatest positive effect for landscape connectivity.
 
 We will obtain the Condatis statistics, the raster layers for the *Flow* and *Progress* metrics, the shapefiles for the *Bottleneck links*, with their associated *power* and *score* metrics. Finally, we will obtain a the shapefile ***Search Areas***, based on the score metric.
 
@@ -39,7 +39,7 @@ Set your working directory using the path where you downloaded the **ZIP**.
 setwd("<YOUR PTAH>/R example")
 ```
 
-## Condatis functions and R packages
+### Condatis functions and R packages
 
 First, lets source the required functions and libraries for the analyses.
 
@@ -286,7 +286,7 @@ We use the `bottleneck_ends` output from the **`results`** list (*`result$bottle
 ```
 
 ## Search areas
-Finaly, we can use the bottleneck links that we created above (`botlines`) to define 'Search areas' based on the bottleneck scores. 
+Finaly, we can use the bottleneck links that we created above (`botlines`) to define 'Search areas' based on the bottleneck scores using the `zones_by_score_range` function. 
 
 In this example, we set the 'major' bottleneck areas defined by any links with a score between 5 and 50, and 'severe' bottleneck areas with a score greater than 50.
 
@@ -332,7 +332,7 @@ library(sf)
 library(terra)
 
 # Load data
-areas = st_read("outputs/Wetland_East_W_E_areas.shp", quiet = TRUE)
+areas = st_read("area/Wetland_East_W_E_areas.shp", quiet = TRUE)
 eghab = rast("data/wetland_east.tif")
 
 # Colors
@@ -351,6 +351,69 @@ legend("topright", legend = names(cols), fill = cols, title = "Category", xpd = 
 
 ```
 Now you can explore this shapefile in your preferred GIS software. As mentioned above, in the **ZIP** folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the rasters and shapefiles we obtained in this exercise.
+
+## Other directions
+If you wish, you can repeat the analyses above using other directions. In the data folder, you will find the rasters for the Northwest-Southeast (NW_SE) and Southeast-East(SE_E) sources and targets.
+
+You can change the input data in the [Sources and targets data] section, for example:
+
+```{r other, eval=FALSE}
+direction = rast("data/east_NW_SE.tif")
+```
+
+Remember to change the name of your `dirnow` variable accordingly. 
+
+```{r rename, echo=TRUE, message=TRUE}
+landname = 'Wetland_East'  
+dirnow = 'NW_SE'
+```
+
+These are the directions available in this excersice:
+
+```{r STothers, echo=FALSE}
+library(terra)
+
+eghab = rast("data/wetland_east.tif")
+direction = rast("data/east_W_E.tif")
+direction2 = rast("data/east_NW_SE.tif")
+direction3 = rast("data/east_SW_E.tif")
+
+plot(eghab, legend = FALSE)
+plot(direction, add=TRUE, legend = FALSE)
+plot(direction2, add=TRUE, col =c('red','blue'), legend = FALSE)
+plot(direction3, add=TRUE, col =c('orange','darkgreen'), legend = FALSE)
+```
+
+You will have to [Convert rasters to points] for these new directions and [Run Condatis] analyses with them. 
+
+## Multidirectional search areas
+It is possible to combine the bottlenecks of multiple directions by combining the shapefiles of the [Bottleneck lines] (named _botlines_) for the multiple directions and apply the `zones_by_score_range` function (as described in [Search areas]). 
+Below are the 'search areas' considering the three directions of movement for this wetland landscape.
+
+```{r allareas, echo=FALSE, message=FALSE, warning=FALSE}
+library(sf)
+library(terra)
+
+# Load data
+areas = st_read("area/Wetland_East_combined_bottleneck_areas.shp", quiet = TRUE)
+eghab = rast("data/wetland_east.tif")
+
+# Colors
+cats = unique(areas$category)
+cols = c("Major" = "pink", "Severe" = "purple")
+cols[setdiff(cats, names(cols))] = "gray"  # default for missing categories
+
+# Adjust margins for legend
+par(mar = c(4, 4, 2, 6))
+
+# Plot
+plot(eghab, legend = FALSE)
+plot(areas, col = cols[areas$category], add = TRUE)
+legend("topright", legend = names(cols), fill = cols, title = "Category", xpd = TRUE, bty = "n")
+    
+
+```
+
 ```{=html}
 <style>
 .copy-btn {
