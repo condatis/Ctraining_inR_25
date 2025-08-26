@@ -45,11 +45,11 @@ First, lets source the required functions and libraries for the analyses.
 
 In this exercise we will use the following Condatis functions:
 
--   `makehabitatpoints` Condatis runs calculations by converting each habitat patch (cell) into data points. This function converts habitat raster files into a dataframe where each patch has *xy* coordinates (in km) and a cover value (raster values)
+-   `makehabitatpoints` Condatis runs calculations by converting each habitat patch (cell) into data points. This function converts habitat raster files into a data frame where each patch has *xy* coordinates (in km) and a cover value (raster values)
 
--   `stargetpt` Similar to the habitat points, we require the source and target (ST) raster to be converted to point. This function converts the ST raster files into a dataframe where each ST patch has *xy* coordinates (in km) with their associated raster value (1 or 2).
+-   `stargetpt` Similar to the habitat points, we require the source and target (ST) raster to be converted to point. This function converts the ST raster files into a data frame where each ST patch has *xy* coordinates (in km) with their associated raster value (1 or 2).
 
--   `condatis_from_points` This function performs the core Condatis analyses, it returns the overall landscape statistics, such as Conductance, and the dataframes required to create the Flow, Progress and Bottleneck spatial layers.
+-   `condatis_from_points` This function performs the core Condatis analyses, it returns the overall landscape statistics, such as Conductance, and the data frames required to create the Flow, Progress and Bottleneck spatial layers.
 
 -   `ends_to_lines` Bottleneck links are stored as start and end coordinates. This function will convert the Condatis output `bottleneck_ends` in a vector file that can be saved as a multi-line shapefile.
 
@@ -124,28 +124,35 @@ dirnow = 'W_E'
 matches = TRUE
   if(!identical(myres,res(direction))){
     matches = FALSE
-    warning(paste("habitat has different resolution from st in direction",direction))
+    warning(paste(
+      "habitat has different resolution from st in direction",
+      direction))
   }
   if(!identical(unitcheck,linearUnits(direction))){
     matches = FALSE
-    warning(paste("habitat has different distance unit from st in direction", direction))
+    warning(paste(
+      "habitat has different distance unit from st in direction",
+      direction))
   }
   if(matches){message(paste("st matches habitat in direction",dirnow))}
-  assign(paste0(landname,"_",dirnow),direction)
+
+assign(paste0(landname,"_",dirnow), direction)
 
 ```
 
 ## Convert rasters to points
 
-We now use the `makehabitatpoints`and `stargetpt` to convert our rasters into data frames. The habitat dataframe (here named `Wetland_East_hab`) contains the columns required to run the Condatis analysis (i.e. x,y and cover), and obtain our output maps (xm and ym). Similarly, the `stnow` list contains, the data frames for the source and targets.
+We now use the `makehabitatpoints`and `stargetpt` to convert our rasters into data frames. The habitat data frame (here named `Wetland_East_hab`) contains the columns required to run the Condatis analysis (i.e. x,y and cover), and obtain our output maps (xm and ym). Similarly, the `stnow` list contains, the data frames for the source and targets.
 
 ```{r happt, eval=FALSE}
 
 # Name habitat according to variable 'landname' and convert raster to points
-assign(paste0(landname,"_hab"),makehabitatpoints(eghab,inm=identical(unitcheck,1)))
+assign(paste0(landname,"_hab"),
+       makehabitatpoints(eghab,inm=identical(unitcheck,1)))
 
 # Get source and target points
-stnow = stargetpt(get(paste0(landname,"_",dirnow)),inm=identical(unitcheck,1)) 
+stnow = stargetpt(get(paste0(landname,"_",dirnow)),
+                  inm=identical(unitcheck,1)) 
 
 ```
 
@@ -172,7 +179,8 @@ Cdisp = 2
 if(identical(unitcheck,1)){
 Ccellside = myres[1]/1000 #resolution in m, cellside in km
 }else{
-  Ccellside= myres[1]# units left unchanged if they are not in m, as within raster to point conversions
+  Ccellside= myres[1]# units left unchanged if they are not in m, 
+                     # as within raster to point conversions
 }
 ```
 
@@ -199,10 +207,10 @@ result = condatis_from_points(
 
 The `condatis_from_points` funtion will return **`results`**, a list with four elements:
 
--   `overall` : a dataframe with the summary of statistic
--   `flow`: a dataframe with the flow and progress values per patch (cell)
--   `power`: a dataframe with the power metrics per link (line), i.e. percentage of power (`powr`), and score (`score`), among other characterstics
--   `bottleneck_ends`: a dataframe with the start and end points of these links
+-   `overall` : a data frame with the summary of statistic
+-   `flow`: a data frame with the flow and progress values per patch (cell)
+-   `power`: a data frame with the power metrics per link (line), i.e. percentage of power (`powr`), and score (`score`), among other characterstics
+-   `bottleneck_ends`: a data frame with the start and end points of these links
 
 We can check for unusual 'voltages' indicating computational errors.
 
@@ -215,7 +223,7 @@ If `jobok = TRUE`, we can continue to analyse our spatial results.
 
 ## Progress and Flow maps
 
-We use the `progress` and `flow` columns from the `result$flow` dataframe to rasterise the points and save these outputs as *.tif* raster files in an 'outputs' folder you will create.
+We use the `progress` and `flow` columns from the `result$flow` data frame to rasterise the points and save these outputs as *.tif* raster files in an 'outputs' folder you will create.
 
 ```{r maps, eval=FALSE}
 if(jobok){
@@ -233,7 +241,10 @@ if(jobok){
   dir.create('outputs') #create an outputs folder
   
   # save raster
-   writeRaster(progress, paste0('outputs/', paste(landname, dirnow, "progress",sep="_"),'.tif'), datatype = "FLT8S",overwrite = TRUE) 
+   writeRaster(progress, 
+               paste0('outputs/', paste(landname, dirnow, "progress",sep="_"),'.tif'), 
+               datatype = "FLT8S",
+               overwrite = TRUE) 
   
    # rasterise 'flow' points 
    flow = rast(result$flow[,c("xm","ym","flow")],
@@ -246,7 +257,10 @@ if(jobok){
    assign(paste(landname, dirnow, "flow",sep="_"),
           flow)
    # save raster
-   writeRaster(flow, paste0('outputs/', paste(landname, dirnow, "flow",sep="_"),'.tif'), datatype = "FLT8S",overwrite = TRUE) 
+   writeRaster(flow, 
+               paste0('outputs/', paste(landname, dirnow, "flow",sep="_"),'.tif'), 
+               datatype = "FLT8S",
+               overwrite = TRUE) 
   
 }
 ```
@@ -281,7 +295,9 @@ We use the `bottleneck_ends` output from the **`results`** list (*`result$bottle
   assign(paste(landname, dirnow, "botlines",sep="_"),botlines)
   
   # save shapefile
-  st_write(botlines, paste0('outputs/',paste(landname, dirnow, "botlines",sep="_"),'.shp'))
+  st_write(botlines, 
+           paste0('outputs/', paste(landname, dirnow, "botlines",sep="_"),'.shp'),
+           append = FALSE)
  
 ```
 
@@ -307,7 +323,7 @@ areasSevere = zones_by_score_range(
   score_range = c(severescore,Inf),
   directioncol="direction")
 
-if(!identical(areasMajor,NA)){   # The  zones_by_score_range function will return NA if there are no lines in the specified score range        
+if(!identical(areasMajor,NA)){   # The  zones_by_score_range function will return NA if                                  # there are no lines in the specified score range        
   areasMajor$category = "Major"
   
   if(!identical(areasSevere, NA)){ 
@@ -321,7 +337,9 @@ if(!identical(areasMajor,NA)){   # The  zones_by_score_range function will retur
 }  
 
 # Save shapefile of major and severe bottleneck areas
-st_write(areas, paste0('outputs/',paste(landname, dirnow, "areas",sep="_"),'.shp'), append=FALSE)
+st_write(areas, 
+         paste0('outputs/',paste(landname, dirnow, "areas",sep="_"),'.shp'),
+         append=FALSE)
 
 ```
 
