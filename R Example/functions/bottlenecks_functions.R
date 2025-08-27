@@ -1,6 +1,8 @@
 ###################### Functions to run Condatis in R ##############
-##Jenny Hodgson, 2024, with important contributions by Tom Travers and Claudia Gutierrez-Arrellano
-##Not for open sharing yet, contact jenny.hodgson@liverpool.ac.uk with any queries
+##Please note that we are making this code and documentation available under a GPL license; for more details see the LICENSE file. 
+##Copyright Jenny Hodgson and Claudia Gutierrez-Arellano 2025 unless otherwise stated (e.g. datasets). We acknowledge important earlier contributions by Tom Travers.
+##Please cite this archive as Jenny Hodgson and Claudia Gutierrez-Arellano (2025) Condatis connectivity analysis to plan resilient habitat networks - Condatis training in R. Available at: https://github.com/condatis/Ctraining_inR_25
+##Contact jenny.hodgson@liverpool.ac.uk with any queries
 
 ##library dependencies - not run to make it easier to 'source' this file
 #library(sf)
@@ -9,6 +11,7 @@
 #library(dplyr)
 ###
 
+############ functions for preparing habitat and source-target information from rasters ###########
 makehabitatpoints<-function(habitatraster,inm=TRUE){
   #converts a habitat raster to points in preparation for the Condatis from points function
   habpt <- terra::as.points(habitatraster, values = TRUE, na.rm = TRUE)
@@ -53,6 +56,7 @@ stargetpt <- function(straster,inm=TRUE){
   names(st_list)<-c('sourcept','targetpt')
   return(st_list)
 }
+
 #################### core condatis function with several output options, but no GIS outputs ##############
 
 condatis_from_points <- function(habpt, sourcept, targetpt, R, 
@@ -182,7 +186,7 @@ condatis_from_points <- function(habpt, sourcept, targetpt, R,
   
   
   ##### #Create dataframes of power scores and location of ends of the bottleneck
-  #powpoints is to convert to line geometries, 2 rows per bottleneck
+  #powpoints is to later convert to line geometries, 2 rows per bottleneck
   #power is one row per bottleneck - to continue analysis in R  
   
   powlong$label <- paste(powlong$a, powlong$b, sep = '_')
@@ -258,7 +262,7 @@ lineobj$length <- sf::st_length(lineobj)# calculate length
 return(lineobj)
 }
 
-###################### NEW function for bottleneck zone polygons given score range, based on Claudia's 2023 work ######
+############# function for bottleneck zone polygons given score range, based on Claudia's 2023 work ######
 
 zones_by_score_range <- function(lineobj, score_range,directioncol="direction",regioncol="region",keepcols=c()){ 
   

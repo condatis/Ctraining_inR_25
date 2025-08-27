@@ -1,5 +1,5 @@
 ---
-title: "Condatis in R"
+title: "Condatis connectivity analysis to plan resilient habitat networks - Condatis training in R - Workflow"
 
 author: "Jenny Hodgson and Claudia Gutierrez-Arellano" 
 date: '`r format(Sys.time(), "%B, %Y")`'
@@ -24,9 +24,21 @@ output:
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, tidy = TRUE) 
 ```
 
-In this exercise we will perfom Condatis analyses in R. As an example, we will assess the connectivity of the wetlands in eastern England. We aim to identify the areas where habitat restoration could have the greatest positive effect for landscape connectivity.
+------------------------------------------------------------------------
+
+Please note that we are making this code and documentation available under a GPL license; for more details see the LICENSE file. Copyright Jenny Hodgson and Claudia Gutierrez-Arellano 2025 unless otherwise stated (e.g. datasets).
+
+Please cite this archive as: Jenny Hodgson and Claudia Gutierrez-Arellano (2025) Condatis connectivity analysis to plan resilient habitat networks - Condatis training in R. Available at: <https://github.com/condatis/Ctraining_inR_25>
+
+------------------------------------------------------------------------
+
+In this exercise we will perform Condatis analyses in R. As an example, we will assess the connectivity of the wetlands in eastern England. We aim to identify the areas where habitat restoration could have the greatest positive effect for landscape connectivity.
 
 We will obtain the Condatis statistics, the raster layers for the *Flow* and *Progress* metrics, the shapefiles for the *Bottleneck links*, with their associated *power* and *score* metrics. Finally, we will obtain a the shapefile ***Search Areas***, based on the score metric.
+
+## How to follow the exercise
+
+You are looking at an R Markdown file, which has chunks of R code interspersed with instructions. You can either copy-paste the R code from your browser into R. Or, you can open the file 'Workflow.Rmd' in RStudio and choose 'run' next to each code chunk. Only the first chunk (setting the working directory) needs to be adapted to your local machine.
 
 ## Data
 
@@ -53,7 +65,7 @@ In this exercise we will use the following Condatis functions:
 
 -   `ends_to_lines` Bottleneck links are stored as start and end coordinates. This function will convert the Condatis output `bottleneck_ends` in a vector file that can be saved as a multi-line shapefile.
 
-- `zones_by_score_range` Each of the bottleneck links has a _'score'_ associated. This function selects those bottlenecks with a user-defined score threshold that specify the value for *major* and *severe* bottleneck. Then, the midpoint of a link is identified to create a buffer of half its length, resulting in a circular polygon with a diameter of the bottleneck length. 
+-   `zones_by_score_range` Each of the bottleneck links has a *'score'* associated. This function selects those bottlenecks with a user-defined score threshold that specify the value for *major* and *severe* bottleneck. Then, the midpoint of a link is identified to create a buffer of half its length, resulting in a circular polygon with a diameter of the bottleneck length.
 
 The functions are in the R script stored in the 'functions' folder.
 
@@ -302,7 +314,8 @@ We use the `bottleneck_ends` output from the **`results`** list (*`result$bottle
 ```
 
 ## Search areas
-Finaly, we can use the bottleneck links that we created above (`botlines`) to define 'Search areas' based on the bottleneck scores using the `zones_by_score_range` function. 
+
+Finaly, we can use the bottleneck links that we created above (`botlines`) to define 'Search areas' based on the bottleneck scores using the `zones_by_score_range` function.
 
 In this example, we set the 'major' bottleneck areas defined by any links with a score between 5 and 50, and 'severe' bottleneck areas with a score greater than 50.
 
@@ -368,9 +381,11 @@ legend("topright", legend = names(cols), fill = cols, title = "Category", xpd = 
     
 
 ```
+
 Now you can explore this shapefile in your preferred GIS software. As mentioned above, in the **ZIP** folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the rasters and shapefiles we obtained in this exercise.
 
 ## Other directions
+
 If you wish, you can repeat the analyses above using other directions. In the data folder, you will find the rasters for the Northwest-Southeast (NW_SE) and Southeast-East(SE_E) sources and targets.
 
 You can change the input data in the [Sources and targets data] section, for example:
@@ -379,7 +394,7 @@ You can change the input data in the [Sources and targets data] section, for exa
 direction = rast("data/east_NW_SE.tif")
 ```
 
-Remember to change the name of your `dirnow` variable accordingly. 
+Remember to change the name of your `dirnow` variable accordingly.
 
 ```{r rename, echo=TRUE, message=TRUE}
 landname = 'Wetland_East'  
@@ -402,11 +417,11 @@ plot(direction2, add=TRUE, col =c('red','blue'), legend = FALSE)
 plot(direction3, add=TRUE, col =c('orange','darkgreen'), legend = FALSE)
 ```
 
-You will have to [Convert rasters to points] for these new directions and [Run Condatis] analyses with them. 
+You will have to [Convert rasters to points] for these new directions and [Run Condatis] analyses with them.
 
 ## Multidirectional search areas
-It is possible to combine the bottlenecks of multiple directions by combining the shapefiles of the [Bottleneck lines] (named _botlines_) for the multiple directions and apply the `zones_by_score_range` function (as described in [Search areas]). 
-Below are the 'search areas' considering the three directions of movement for this wetland landscape.
+
+It is possible to combine the bottlenecks of multiple directions by combining the shapefiles of the [Bottleneck lines] (named *botlines*) for the multiple directions and apply the `zones_by_score_range` function (as described in [Search areas]). Below are the 'search areas' considering the three directions of movement for this wetland landscape.
 
 ```{r allareas, echo=FALSE, message=FALSE, warning=FALSE}
 library(sf)
