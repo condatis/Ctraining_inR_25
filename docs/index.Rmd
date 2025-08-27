@@ -60,7 +60,7 @@ Read the full [web app help documentation](https://webapp.condatis.org.uk/help/h
 
 *Wetland connectivity in Eastern England*
 
-In this exercise we will use R to explore the occurrence of bottlenecks for the wetlands in the east of England. Link to [full instructions in the workflow](https://condatis.github.io/Ctraining_inR_25/workflow) and the [introductory presentation](https://condatis.github.io/Ctraining_inR_25/bottlenecks_introduction.pdf)
+In this exercise we will use R to explore the occurrence of bottlenecks for the wetlands in the east of England. Link to [full instructions in the workflow](https://condatis.github.io/Ctraining_inR_25/rworkflow) and the [introductory presentation](https://condatis.github.io/Ctraining_inR_25/bottlenecks_introduction.pdf)
 
 You can explore the outputs in this [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example/QGIS_project), by opening the *Condatis_Wetland_East.qgz* in QGIS, or load the layers in your preferred GIS software.
 
