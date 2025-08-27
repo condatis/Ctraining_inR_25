@@ -47,8 +47,8 @@ stargetpt <- function(straster,inm=TRUE){
     names(stpt1)<- c("x","y","st")
   }
   
-  targetpt<-stpt1[stpt1$st==2,]
-  sourcept<-stpt1[stpt1$st==1,]
+  targetpt<-stpt1[stpt1$st==1,]
+  sourcept<-stpt1[stpt1$st==0,]
   st_list<-list(sourcept, targetpt)
   names(st_list)<-c('sourcept','targetpt')
   return(st_list)
