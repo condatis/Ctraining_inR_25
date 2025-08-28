@@ -1,0 +1,487 @@
+---
+title: "Condatis connectivity analysis to plan resilient habitat networks - Condatis training in R - Workflow"
+
+author: "Jenny Hodgson and Claudia Gutierrez-Arellano" 
+date: '`r format(Sys.time(), "%B, %Y")`'
+
+output:
+  html_document: 
+    collapsed: false
+    theme: journal
+    highlight: kate
+    toc: true
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+  github_document:
+    toc: yes
+    toc_depth: 4
+    html_preview: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, tidy = TRUE) 
+```
+
+------------------------------------------------------------------------
+
+Please note that we are making this code and documentation available under a GPL license; for more details see the LICENSE file. Copyright Jenny Hodgson and Claudia Gutierrez-Arellano 2025 unless otherwise stated (e.g. datasets).
+
+Please cite this archive as: Jenny Hodgson and Claudia Gutierrez-Arellano (2025) Condatis connectivity analysis to plan resilient habitat networks - Condatis training in R. Available at: <https://github.com/condatis/Ctraining_inR_25>
+
+------------------------------------------------------------------------
+
+In this exercise we will perform Condatis analyses in R. As an example, we will assess the connectivity of the wetlands in eastern England. We aim to identify the areas where habitat restoration could have the greatest positive effect for landscape connectivity.
+
+We will obtain the Condatis statistics, the raster layers for the *Flow* and *Progress* metrics, the shapefiles for the *Bottleneck links*, with their associated *power* and *score* metrics. Finally, we will obtain a the shapefile ***Search Areas***, based on the score metric.
+
+## How to follow the exercise
+
+You are looking at an R Markdown file, which has chunks of R code interspersed with instructions. You can either copy-paste the R code from your browser into R. Or, you can open the file 'Workflow.Rmd' in RStudio and choose 'run' next to each code chunk. Only the first chunk (setting the working directory) needs to be adapted to your local machine.
+
+## Data
+
+The data required for this exercise are in the *R example* folder of the [Workshop GitHub repository](https://github.com/condatis/Ctraining_inR_25/tree/main).
+
+Set your working directory using the path where you downloaded the **ZIP**.
+
+```{r path, eval=FALSE}
+
+setwd("<YOUR PTAH>/R example")
+```
+
+### Condatis functions and R packages
+
+First, lets source the required functions and libraries for the analyses.
+
+In this exercise we will use the following Condatis functions:
+
+-   `makehabitatpoints` Condatis runs calculations by converting each habitat patch (cell) into data points. This function converts habitat raster files into a data frame where each patch has *xy* coordinates (in km) and a cover value (raster values)
+
+-   `stargetpt` Similar to the habitat points, we require the source and target (ST) raster to be converted to point. This function converts the ST raster files into a data frame where each ST patch has *xy* coordinates (in km) with their associated raster value (1 or 2).
+
+-   `condatis_from_points` This function performs the core Condatis analyses, it returns the overall landscape statistics, such as Conductance, and the data frames required to create the Flow, Progress and Bottleneck spatial layers.
+
+-   `ends_to_lines` Bottleneck links are stored as start and end coordinates. This function will convert the Condatis output `bottleneck_ends` in a vector file that can be saved as a multi-line shapefile.
+
+-   `zones_by_score_range` Each of the bottleneck links has a *'score'* associated. This function selects those bottlenecks with a user-defined score threshold that specify the value for *major* and *severe* bottleneck. Then, the midpoint of a link is identified to create a buffer of half its length, resulting in a circular polygon with a diameter of the bottleneck length.
+
+The functions are in the R script stored in the 'functions' folder.
+
+```{r functions, eval=FALSE}
+
+source("functions/bottlenecks_functions.R")
+```
+
+We need the following R packages to run the Condatis function
+
+```{r libraries, eval=FALSE}
+
+library(sf)
+library(terra)
+library(sfheaders)
+library(dplyr)
+library(viridis)
+```
+
+### Habitat data
+
+First, we need to load the habitat raster, defined in our code as `eghab`. Then, we extract the spatial properties of the raster, i.e. the Coordinate Reference System (crs) and the extent. Condatis requires a raster with units in meters. If your raster is in a different linear unit or in angular units, you will have to project your raster to a crs in meters.
+
+```{r habitat, eval=TRUE}
+library(terra)
+
+eghab = rast("data/wetland_east.tif")
+
+# Obtain Coordinate Reference System (crs) and extent (ext)
+regextent = ext(eghab)
+mycrs = crs(eghab)
+myres = res(eghab)
+unitcheck = linearUnits(eghab) # returns 1 if the unit is meters
+```
+
+```{r eghab, echo=FALSE}
+library(terra)
+
+eghab = rast("data/wetland_east.tif")
+
+plot(eghab)
+```
+
+### Sources and targets data
+
+In this example we will assess the East-West connectivity of our landscape. So, we must add our Source-Target raster, which we define in our code as `direction`.
+
+```{r ST, eval=FALSE}
+direction = rast("data/east_W_E.tif")
+
+```
+
+```{r STplot, echo=FALSE}
+library(terra)
+
+eghab = rast("data/wetland_east.tif")
+direction = rast("data/east_W_E.tif")
+plot(eghab, legend = FALSE)
+plot(direction, add=TRUE)
+```
+
+We can verify that our habitat and ST raster have the same spatial properties. Then name our ST raster accordingly. Defining `landname` and `dirnow` facilitates the reproducibility of the code for other landscapes or directions.
+
+```{r check, echo=TRUE, message=TRUE}
+landname = 'Wetland_East'  
+dirnow = 'W_E'
+
+matches = TRUE
+  if(!identical(myres,res(direction))){
+    matches = FALSE
+    warning(paste(
+      "habitat has different resolution from st in direction",
+      direction))
+  }
+  if(!identical(unitcheck,linearUnits(direction))){
+    matches = FALSE
+    warning(paste(
+      "habitat has different distance unit from st in direction",
+      direction))
+  }
+  if(matches){message(paste("st matches habitat in direction",dirnow))}
+
+assign(paste0(landname,"_",dirnow), direction)
+
+```
+
+## Convert rasters to points
+
+We now use the `makehabitatpoints`and `stargetpt` to convert our rasters into data frames. The habitat data frame (here named `Wetland_East_hab`) contains the columns required to run the Condatis analysis (i.e. x,y and cover), and obtain our output maps (xm and ym). Similarly, the `stnow` list contains, the data frames for the source and targets.
+
+```{r happt, eval=FALSE}
+
+# Name habitat according to variable 'landname' and convert raster to points
+assign(paste0(landname,"_hab"),
+       makehabitatpoints(eghab,inm=identical(unitcheck,1)))
+
+# Get source and target points
+stnow = stargetpt(get(paste0(landname,"_",dirnow)),
+                  inm=identical(unitcheck,1)) 
+
+```
+
+## Run Condatis
+
+### Set Condatis parameters
+
+The user-defined inputs required for the Condatis function are:
+
+-   The habitat (`habpt`) and source-target (`sourcept`, `targetpt`) points obtained above.
+
+-   A dispersal distance in km (`disp`). Here we will use a 2 km dispersal distance.
+
+-   Cell side (`cellside`). We calculate the cell size in kilometers based on the resolution of the habitat raster, we named this `myres` above. If the raster units are not meter, the cellside will not be converted to km.
+
+-   Reproductive rate (`R`). This represent the average number of individuals produced per generation per km^2^. Here we set R to 1000.
+
+Other parameters have default values, we will not modify them in this exercise. For details see the comments of the function `condatis_from_points`.
+
+```{r param, eval=FALSE}
+
+Cdisp = 2
+
+if(identical(unitcheck,1)){
+Ccellside = myres[1]/1000 #resolution in m, cellside in km
+}else{
+  Ccellside= myres[1]# units left unchanged if they are not in m, 
+                     # as within raster to point conversions
+}
+```
+
+### Run analysis
+
+Now we can run the Condatis analysis.
+
+```{r condatis, eval=FALSE}
+result = condatis_from_points(
+  habpt= get(paste0(landname,"_hab")), # habitat points
+  sourcept=stnow$sourcept[,c("x","y")], # source points
+  targetpt=stnow$targetpt[,c("x","y")], # target points
+  R=1000, 
+  disp = Cdisp, 
+  cellside = Ccellside, 
+  metric ='ALL',   
+  filename =  NA, 
+  threshold = 0.95, 
+  minscore=1, 
+  maxlink = 50000, 
+  minlink = 1,
+  maxdisp = Inf)
+```
+
+The `condatis_from_points` funtion will return **`results`**, a list with four elements:
+
+-   `overall` : a data frame with the summary of statistic
+-   `flow`: a data frame with the flow and progress values per patch (cell)
+-   `power`: a data frame with the power metrics per link (line), i.e. percentage of power (`powr`), and score (`score`), among other characterstics
+-   `bottleneck_ends`: a data frame with the start and end points of these links
+
+We can check for unusual 'voltages' indicating computational errors.
+
+```{r test, eval=FALSE}
+  jobok= result$overall$minprog > (0-10^-6)
+  jobok= jobok & result$overall$maxprog < (1+10^-6) 
+```
+
+If `jobok = TRUE`, we can continue to analyse our spatial results.
+
+## Progress and Flow maps
+
+We use the `progress` and `flow` columns from the `result$flow` data frame to rasterise the points and save these outputs as *.tif* raster files in an 'outputs' folder you will create.
+
+```{r maps, eval=FALSE}
+if(jobok){
+ 
+  # rasterise 'progress' points
+    progress = rast(result$flow[,c("xm","ym","progress")],
+              type="xyz",
+              crs=mycrs, 
+              digits=1, 
+              extent=regextent)
+  
+  assign(paste(landname, dirnow, "progress",sep="_"),
+         progress)
+  
+  dir.create('outputs') #create an outputs folder
+  
+  # save raster
+   writeRaster(progress, 
+               paste0('outputs/', paste(landname, dirnow, "progress",sep="_"),'.tif'), 
+               datatype = "FLT8S",
+               overwrite = TRUE) 
+  
+   # rasterise 'flow' points 
+   flow = rast(result$flow[,c("xm","ym","flow")],
+              type="xyz",
+              crs=mycrs, 
+              digits=1,
+              extent=regextent)
+ 
+ 
+   assign(paste(landname, dirnow, "flow",sep="_"),
+          flow)
+   # save raster
+   writeRaster(flow, 
+               paste0('outputs/', paste(landname, dirnow, "flow",sep="_"),'.tif'), 
+               datatype = "FLT8S",
+               overwrite = TRUE) 
+  
+}
+```
+
+You can explore these rasters in your preferred GIS software. Also, in the **ZIP** folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the outputs with an adapted symbology.
+
+```{r plotflowprogress, echo=FALSE}
+library(terra)
+landname = 'Wetland_East'  
+dirnow = 'W_E'
+progress = rast('QGIS_project/Wetland_East_W_E_progress.tif')
+flow = rast('QGIS_project/Wetland_East_W_E_flow.tif')
+par(mfrow = c(1, 2))
+plot(progress,main = 'Progress')
+plot(log10(flow) , main = expression( ~ log[10]~ Flow))
+```
+
+## Bottleneck lines
+
+We use the `bottleneck_ends` output from the **`results`** list (*`result$bottleneck_ends`*) as the input for the `ends_to_lines` function . Then we save the results as a shapefile in the outputs folder you just created.
+
+```{r botlines, eval=FALSE}
+
+  ends = result$bottleneck_ends
+  
+  ends$direction = dirnow # add the direction
+  
+  botlines = ends_to_lines(endstab=ends,
+                           minscore=1,
+                           crs=mycrs)
+  
+  assign(paste(landname, dirnow, "botlines",sep="_"),botlines)
+  
+  # save shapefile
+  st_write(botlines, 
+           paste0('outputs/', paste(landname, dirnow, "botlines",sep="_"),'.shp'),
+           append = FALSE)
+ 
+```
+
+## Search areas
+
+Finaly, we can use the bottleneck links that we created above (`botlines`) to define 'Search areas' based on the bottleneck scores using the `zones_by_score_range` function.
+
+In this example, we set the 'major' bottleneck areas defined by any links with a score between 5 and 50, and 'severe' bottleneck areas with a score greater than 50.
+
+At the end of this section we combined the `areasMajor` and `areasSevere` outputs into a single dataset `areas`.
+
+```{r search, eval=FALSE}
+
+majorscore = 5
+severescore = 50
+
+areasMajor = zones_by_score_range(
+  botlines, 
+  score_range = c(majorscore,severescore),
+  directioncol="direction")
+
+areasSevere = zones_by_score_range(
+  botlines, 
+  score_range = c(severescore,Inf),
+  directioncol="direction")
+
+if(!identical(areasMajor,NA)){   # The  zones_by_score_range function will return NA if                                  # there are no lines in the specified score range        
+  areasMajor$category = "Major"
+  
+  if(!identical(areasSevere, NA)){ 
+    areasSevere$category = "Severe"
+    areas = dplyr::bind_rows(areasMajor, areasSevere)      
+    
+  } else{
+    areas = areasMajor
+    
+  }
+}  
+
+# Save shapefile of major and severe bottleneck areas
+st_write(areas, 
+         paste0('outputs/',paste(landname, dirnow, "areas",sep="_"),'.shp'),
+         append=FALSE)
+
+```
+
+Your shapefile will compile the areas categorised as 'major' or 'severe', the number of bottlenecks that are included in that areas and the sum of their scores.
+
+```{r areas, echo=FALSE, message=FALSE, warning=FALSE}
+library(sf)
+library(terra)
+
+# Load data
+areas = st_read("area/Wetland_East_W_E_areas.shp", quiet = TRUE)
+eghab = rast("data/wetland_east.tif")
+
+# Colors
+cats = unique(areas$category)
+cols = c("Major" = "pink", "Severe" = "purple")
+cols[setdiff(cats, names(cols))] = "gray"  # default for missing categories
+
+# Adjust margins for legend
+par(mar = c(4, 4, 2, 6))
+
+# Plot
+plot(eghab, legend = FALSE)
+plot(areas, col = cols[areas$category], add = TRUE)
+legend("topright", legend = names(cols), fill = cols, title = "Category", xpd = TRUE, bty = "n")
+    
+
+```
+
+Now you can explore this shapefile in your preferred GIS software. As mentioned above, in the **ZIP** folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the rasters and shapefiles we obtained in this exercise.
+
+## Other directions
+
+If you wish, you can repeat the analyses above using other directions. In the data folder, you will find the rasters for the Northwest-Southeast (NW_SE) and Southeast-East(SE_E) sources and targets.
+
+You can change the input data in the [Sources and targets data] section, for example:
+
+```{r other, eval=FALSE}
+direction = rast("data/east_NW_SE.tif")
+```
+
+Remember to change the name of your `dirnow` variable accordingly.
+
+```{r rename, echo=TRUE, message=TRUE}
+landname = 'Wetland_East'  
+dirnow = 'NW_SE'
+```
+
+These are the directions available in this excersice:
+
+```{r STothers, echo=FALSE}
+library(terra)
+
+eghab = rast("data/wetland_east.tif")
+direction = rast("data/east_W_E.tif")
+direction2 = rast("data/east_NW_SE.tif")
+direction3 = rast("data/east_SW_E.tif")
+
+plot(eghab, legend = FALSE)
+plot(direction, add=TRUE, legend = FALSE)
+plot(direction2, add=TRUE, col =c('red','blue'), legend = FALSE)
+plot(direction3, add=TRUE, col =c('orange','darkgreen'), legend = FALSE)
+```
+
+You will have to [Convert rasters to points] for these new directions and [Run Condatis] analyses with them.
+
+## Multidirectional search areas
+
+It is possible to combine the bottlenecks of multiple directions by combining the shapefiles of the [Bottleneck lines] (named *botlines*) for the multiple directions and apply the `zones_by_score_range` function (as described in [Search areas]). Below are the 'search areas' considering the three directions of movement for this wetland landscape.
+
+```{r allareas, echo=FALSE, message=FALSE, warning=FALSE}
+library(sf)
+library(terra)
+
+# Load data
+areas = st_read("area/Wetland_East_combined_bottleneck_areas.shp", quiet = TRUE)
+eghab = rast("data/wetland_east.tif")
+
+# Colors
+cats = unique(areas$category)
+cols = c("Major" = "pink", "Severe" = "purple")
+cols[setdiff(cats, names(cols))] = "gray"  # default for missing categories
+
+# Adjust margins for legend
+par(mar = c(4, 4, 2, 6))
+
+# Plot
+plot(eghab, legend = FALSE)
+plot(areas, col = cols[areas$category], add = TRUE)
+legend("topright", legend = names(cols), fill = cols, title = "Category", xpd = TRUE, bty = "n")
+    
+
+```
+
+```{=html}
+<style>
+.copy-btn {
+  float: right;
+  margin: 5px;
+  padding: 2px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: #f9f9f9;
+}
+.copy-btn:hover {
+  background: #e0e0e0;
+}
+</style>
+```
+
+```{=html}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll("pre code").forEach(function(codeBlock) {
+    var button = document.createElement("button");
+    button.innerHTML = "Copy";
+    button.className = "copy-btn";
+
+    var pre = codeBlock.parentNode;
+    pre.parentNode.insertBefore(button, pre);
+
+    button.addEventListener("click", function() {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      button.innerHTML = "Copied!";
+      setTimeout(function(){ button.innerHTML = "Copy"; }, 2000);
+    });
+  });
+});
+</script>
+```
