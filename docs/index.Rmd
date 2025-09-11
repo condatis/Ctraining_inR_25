@@ -52,7 +52,7 @@ Download presentation slides with introduction to Condatis and the Sabah exercis
 
 View quick reference document for the Sabah exercise ([Web_app_quick_reference.pdf](https://condatis.github.io/Ctraining_inR_25/Web_app_quick_reference.pdf))
 
-Direct link to the [Condatis Web App](https:webapp.condatis.org.uk)
+Direct link to the [Condatis Web App](https://webapp.condatis.org.uk)
 
 Read the full [web app help documentation](https://webapp.condatis.org.uk/help/help.html)
 
@@ -74,7 +74,7 @@ Condatis is decision support software to identify the best locations for habitat
 
 3.  Ranks the feasible sites for habitat restoration, to efficiently enhance the existing habitat network.
 
-Condatis has been developed since 2015 and has been used by conservation practitioners around the world, via its web application ([www.condatis.org.uk](www.condatis.org.uk)). Through collaboration with users, we have designed it to be fast and user-friendly, and to work with the kind of data that organisations typically have. This workshop will provide a brief overview of the software and a series of graded exercises, showcasing the different functions of Condatis.
+Condatis has been developed since 2015 and has been used by conservation practitioners around the world, via its web application ([www.condatis.org.uk](https://www.condatis.org.uk)). Through collaboration with users, we have designed it to be fast and user-friendly, and to work with the kind of data that organisations typically have. This workshop will provide a brief overview of the software and a series of graded exercises, showcasing the different functions of Condatis.
 
 ## Background requirements
 
