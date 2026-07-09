@@ -4,9 +4,11 @@ author: "Jenny Hodgson and Claudia Gutierrez-Arellano"
 output: github_document
 ---
 
-*Training first delivered in September 2025, by Jenny Hodgson and Claudia Gutierrez-Arellano*
+*Training first delivered in September 2025, by Jenny Hodgson and Claudia Gutierrez-Arellano.*
 
-This github repository contains most of the materials you will need to go through the training examples for yourself.
+*Updated in July 2026 to deliver training online*
+
+This github repository contains the materials you will need to go through the training examples for yourself.
 
 If you're unfamiliar with github, don't worry! Just click on the green button that says "\<\> Code" to reveal a short menu, and then choose "Download ZIP". You can unzip the download anywhere that's convenient on your own computer.
 
@@ -24,7 +26,7 @@ Condatis has been developed since 2015 and has been used by conservation practit
 
 ## Background requirements
 
-There will be examples using the Condatis web app as well as the R environment. Attendees will need some familiarity with GIS, e.g. reading, writing and querying raster data. You may use your own favoured GIS software or spatial package to view our input and output data, either R, ArcGIS Pro or QGIS. It may be advisable to update your GIS package to the latest version. We will not be offering in-depth GIS help during the session. R is essential for one of our exercises (for the analysis and not just for its GIS capability). Please install R version 4.3 or later before you start, and install the packages terra, sf, sfheaders, tidyverse and viridis. Before using the Condatis web app, you need to create a user account for yourself at <https://webapp.condatis.org.uk>.
+There will be examples using the Condatis web app as well as the R environment. Attendees will need some familiarity with GIS, e.g. reading, writing and querying raster data. You may use your own favoured GIS software or spatial package to view our input and output data, either R, ArcGIS Pro or QGIS. It may be advisable to update your GIS package to the latest version. We will not be offering in-depth GIS help during the session. R is essential for the second exercise (for the analysis and not just for its GIS capability). Please install R version 4.3 or later before you start, and install the packages terra, sf, sfheaders, tidyverse and viridis. Before using the Condatis web app, you need to create a user account for yourself at <https://webapp.condatis.org.uk>.
 
 ## Programme
 
