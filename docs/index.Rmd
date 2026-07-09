@@ -1,6 +1,6 @@
 ---
-title: "Condatis in R 2025 (Ctraining_inR_25) Workshop Programme"
-author: "Jenny Hodgson and Claudia Gutierrez-Arellano" 
+title: "Condatis in R 2025 (Ctraining_inR_25) Workshop Programme (updated 2026)"
+author: "Jenny Hodgson" 
 date: '`r format(Sys.time(), "%B, %Y")`'
 
 output:
@@ -27,16 +27,29 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Session 1
 
--   11:20 — 11:35 Introduction to Condatis
--   11:35 — 12:00 Web App tour and explaining the Sabah exercise
--   12:00 — 12:40 Sabah exercise running, viewing outputs in GIS, with help as needed
--   12:40 — 12:50 Condatis Bottlenecks introductory presentation
+-   09:00 Introduction to Condatis
+-   09:15 Web App tour and explaining the Sabah exercise
+-   09:30 Sabah exercise running, viewing outputs in GIS, with help as needed
+-   10:20 Condatis Bottlenecks introductory presentation
+-   10:30 Break
 
 ### Session 2
 
--   14:50 — 15:50 Condatis Bottlenecks Eastern England exercise in R
--   15:50 — 16:10 Recap, Q&A and requests
--   16:10 — 16:20 According to requests, either explore Condatis outputs further in GIS, or discuss applications for your own work
+-   11:00 Condatis Bottlenecks Eastern England exercise in R
+-   11:50 Recap; Q&A and requests; feedback survey
+-   12:10 According to requests, either explore Condatis outputs further in GIS, or discuss applications for your own work
+
+## Housekeeping for the training in Microsoft Teams, 2026
+
+-   We have different experience levels but we are all here to learn. All questions are worth asking. You are encouraged to help each other.
+
+-   Please mute your mic whenever not speaking, to avoid noise.
+
+-   Please place short questions in the chat feed. You can elaborate on them verbally when useful.
+
+-   If you lose your connection to Teams you can email Ricardo (he emailed you the Teams link recently)
+
+-   We have a breakout room for 1:1 help with Georgia
 
 ## Links to materials[^1]
 
@@ -44,25 +57,25 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Finding the data
 
-Data for both our exercises are included in the Github repository here. It is simplest to download the whole repository [here](https://github.com/condatis/Ctraining_inR_25/tree/main)
+Data for both our exercises are included in a Github repository. It is simplest to download the whole repository [here](https://github.com/condatis/Ctraining_inR_25/tree/main)
 
-### Session 1. Condatis Web App
+Also, download Jenny's training presentation slides with introduction to Condatis and both exercises ([Condatis-training-slides-2026.pdf](https://condatis.github.io/Ctraining_inR_25/Condatis-training-slides-2026.pdf))
 
-Download presentation slides with introduction to Condatis and the Sabah exercise ([Hodgson-condatis-intro-IALE.pdf](https://condatis.github.io/Ctraining_inR_25/Hodgson-condatis-intro-IALE.pdf))
+### Session 1. Condatis Web App materials
 
-View quick reference document for the Sabah exercise ([Web_app_quick_reference.pdf](https://condatis.github.io/Ctraining_inR_25/Web_app_quick_reference.pdf))
+This quick reference document for the Sabah exercise summarises the steps you take (complementing the longer explanation which is in the training slides) ([Web_app_quick_reference.pdf](https://condatis.github.io/Ctraining_inR_25/Web_app_quick_reference.pdf))
 
 Direct link to the [Condatis Web App](https://webapp.condatis.org.uk)
 
 Read the full [web app help documentation](https://webapp.condatis.org.uk/help/help.html)
 
-### Session 2. Condatis R
+### Session 2. Condatis in R materials
 
 *Wetland connectivity in Eastern England*
 
-In this exercise we will use R to explore the occurrence of bottlenecks for the wetlands in the east of England. Link to [full instructions in the workflow](https://condatis.github.io/Ctraining_inR_25/rworkflow) and the [introductory presentation](https://condatis.github.io/Ctraining_inR_25/bottlenecks_introduction.pdf)
+In this exercise we will use R to explore the occurrence of bottlenecks for the wetlands in the east of England. You will basically need the [full instructions in the workflow](https://condatis.github.io/Ctraining_inR_25/rworkflow). This is complemented by slides no. 46-55 in the training slides.
 
-You can explore the outputs in this [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example/QGIS_project), by opening the *Condatis_Wetland_East.qgz* in QGIS, or load the layers in your preferred GIS software.
+You can explore the outputs in your preferred GIS software.
 
 ## Session summary - Condatis connectivity analysis to plan resilient habitat networks
 
