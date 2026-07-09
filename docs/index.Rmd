@@ -67,7 +67,7 @@ This quick reference document for the Sabah exercise summarises the steps you ta
 
 Direct link to the [Condatis Web App](https://webapp.condatis.org.uk)
 
-Read the full [web app help documentation](https://webapp.condatis.org.uk/help/help.html)
+Read the full [web app help documentation](https://pgb.liv.ac.uk/~condatis_dev/help/help.html)
 
 ### Session 2. Condatis in R materials
 
