@@ -282,7 +282,7 @@ if(jobok){
 }
 ```
 
-You can explore these rasters in your preferred GIS software. Also, in the **ZIP** folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the outputs with an adapted symbology.
+You can explore these rasters in your preferred GIS software, as well as plotting them in R, as below: 
 
 ```{r plotflowprogress, echo=FALSE}
 library(terra)
@@ -298,6 +298,8 @@ plot(direction, add=TRUE,col=c("cyan","purple"),legend=F)
 plot(sqrt(flow) , main = "sqrt of Flow",col=magma(12,direction=-1,end=0.9))
 plot(direction, add=TRUE,col=c("cyan","purple"),legend=F)
 ```
+
+
 You might notice that where the landscape shows discontinuities/jumps in progress is where the most serious bottlenecks tend to be (compare the above plot with the search areas below). Also, it is clear that the flow is concentrated around the easiest route from the source to the target.
 
 ## Bottleneck lines
@@ -392,11 +394,11 @@ legend("topright", legend = names(cols), fill = cols, title = "Category", xpd = 
 
 ```
 
-Now you can explore this shapefile in your preferred GIS software. As mentioned above, in the **ZIP** folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the rasters and shapefiles we obtained in this exercise.
+Now you can explore this shapefile 'Wetland_East_W_E_areas.shp' in your preferred GIS software. You could overlay the bottleneck lines and notice how the 'areas' make it simpler to focus on the most impactful bottlenecks.
 
 ## Other directions - optional extra
 
-If you wish, you can repeat the analyses above using other directions. In the data folder, you will find the rasters for the Northwest-Southeast (NW_SE) and Southeast-East(SE_E) sources and targets.
+If you wish, you can repeat the analyses above using other source-target directions. In the data folder, you will find the rasters for the Northwest-Southeast (NW_SE) and Southeast-East(SE_E) sources and targets.
 The code in this part is somewhat trickier than the code above. The trickiness doesn't matter if you simply 'play' what we have written and see what happens. But it matters if you wanted to adapt the code for your own example landscape. 
 
 You can change the input data in the [Sources and targets data] section, for example:
@@ -412,7 +414,7 @@ landname = 'Wetland_East'
 dirnow = 'NW_SE'
 ```
 
-These are the directions available in this excersice:
+These are the directions available in this exercise:
 
 ```{r STothers, echo=TRUE}
 library(terra)
