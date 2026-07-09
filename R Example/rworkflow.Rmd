@@ -21,7 +21,12 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, tidy = TRUE) 
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+ 
 ```
 
 ------------------------------------------------------------------------
@@ -48,7 +53,7 @@ Set your working directory using the path where you downloaded the **ZIP**.
 
 ```{r path, eval=FALSE}
 
-setwd("<YOUR PTAH>/R example")
+setwd("MY PATH/R Example")
 ```
 
 ### Condatis functions and R packages
@@ -76,7 +81,7 @@ source("functions/bottlenecks_functions.R")
 
 We need the following R packages to run the Condatis function
 
-```{r libraries, eval=FALSE}
+```{r libraries, message=FALSE}
 
 library(sf)
 library(terra)
@@ -89,7 +94,7 @@ library(viridis)
 
 First, we need to load the habitat raster, defined in our code as `eghab`. Then, we extract the spatial properties of the raster, i.e. the Coordinate Reference System (crs) and the extent. Condatis requires a raster with units in meters. If your raster is in a different linear unit or in angular units, you will have to project your raster to a crs in meters.
 
-```{r habitat, eval=TRUE}
+```{r habitat, echo=TRUE}
 library(terra)
 
 eghab = rast("data/wetland_east.tif")
@@ -99,32 +104,29 @@ regextent = ext(eghab)
 mycrs = crs(eghab)
 myres = res(eghab)
 unitcheck = linearUnits(eghab) # returns 1 if the unit is meters
-```
 
-```{r eghab, echo=FALSE}
-library(terra)
-
-eghab = rast("data/wetland_east.tif")
-
-plot(eghab)
+# Plot the habitat with 5 cover categories
+plot(eghab,col=cividis(5,direction=-1),main="wetland habitat cover")
 ```
 
 ### Sources and targets data
 
 In this example we will assess the East-West connectivity of our landscape. So, we must add our Source-Target raster, which we define in our code as `direction`.
 
-```{r ST, eval=FALSE}
+```{r ST, include=FALSE}
 direction = rast("data/east_W_E.tif")
 
 ```
+
+For the remaining plots/maps in this document, the code that produces them is hidden in the HTML version, but it can be seen by opening the rworkflow.Rmd file.
 
 ```{r STplot, echo=FALSE}
 library(terra)
 
 eghab = rast("data/wetland_east.tif")
 direction = rast("data/east_W_E.tif")
-plot(eghab, legend = FALSE)
-plot(direction, add=TRUE)
+plot(eghab,col=cividis(5,direction=-1), legend = FALSE, main="East-West Source and Target")
+plot(direction, add=TRUE,col=c("cyan","purple"))
 ```
 
 We can verify that our habitat and ST raster have the same spatial properties. Then name our ST raster accordingly. Defining `landname` and `dirnow` facilitates the reproducibility of the code for other landscapes or directions.
@@ -138,16 +140,18 @@ matches = TRUE
     matches = FALSE
     warning(paste(
       "habitat has different resolution from st in direction",
-      direction))
+      dirnow))
   }
   if(!identical(unitcheck,linearUnits(direction))){
     matches = FALSE
     warning(paste(
       "habitat has different distance unit from st in direction",
-      direction))
+      dirnow))
   }
   if(matches){message(paste("st matches habitat in direction",dirnow))}
 
+#assign a new object where this source-target raster is labelled 
+#(as above, useful when running loops with multiple directions) 
 assign(paste0(landname,"_",dirnow), direction)
 
 ```
@@ -198,7 +202,7 @@ Ccellside = myres[1]/1000 #resolution in m, cellside in km
 
 ### Run analysis
 
-Now we can run the Condatis analysis.
+Now we can run the Condatis analysis. It can take some time, depending on the spec of your computer.
 
 ```{r condatis, eval=FALSE}
 result = condatis_from_points(
@@ -212,7 +216,7 @@ result = condatis_from_points(
   filename =  NA, 
   threshold = 0.95, 
   minscore=1, 
-  maxlink = 50000, 
+  maxlink = 1000, 
   minlink = 1,
   maxdisp = Inf)
 ```
@@ -226,9 +230,10 @@ The `condatis_from_points` funtion will return **`results`**, a list with four e
 
 We can check for unusual 'voltages' indicating computational errors.
 
-```{r test, eval=FALSE}
+```{r test, echo=TRUE, message=TRUE, eval=FALSE}
   jobok= result$overall$minprog > (0-10^-6)
   jobok= jobok & result$overall$maxprog < (1+10^-6) 
+  jobok
 ```
 
 If `jobok = TRUE`, we can continue to analyse our spatial results.
@@ -283,12 +288,17 @@ You can explore these rasters in your preferred GIS software. Also, in the **ZIP
 library(terra)
 landname = 'Wetland_East'  
 dirnow = 'W_E'
+#this reads the rasters from a different folder, just so that the Condatis code
+#needn't be run to produce plots. Note that chunks above are not evaluated by default
 progress = rast('QGIS_project/Wetland_East_W_E_progress.tif')
 flow = rast('QGIS_project/Wetland_East_W_E_flow.tif')
 par(mfrow = c(1, 2))
-plot(progress,main = 'Progress')
-plot(log10(flow) , main = expression( ~ log[10]~ Flow))
+plot(progress,main = 'Progress', col=viridis(15,direction=-1))
+plot(direction, add=TRUE,col=c("cyan","purple"),legend=F)
+plot(sqrt(flow) , main = "sqrt of Flow",col=magma(12,direction=-1,end=0.9))
+plot(direction, add=TRUE,col=c("cyan","purple"),legend=F)
 ```
+You might notice that where the landscape shows discontinuities/jumps in progress is where the most serious bottlenecks tend to be (compare the above plot with the search areas below). Also, it is clear that the flow is concentrated around the easiest route from the source to the target.
 
 ## Bottleneck lines
 
@@ -362,8 +372,8 @@ Your shapefile will compile the areas categorised as 'major' or 'severe', the nu
 library(sf)
 library(terra)
 
-# Load data
-areas = st_read("area/Wetland_East_W_E_areas.shp", quiet = TRUE)
+# Load data (again from files, so can be run independently of above chunks)
+areas = st_read("QGIS_project/Wetland_East_W_E_areas.shp", quiet = TRUE)
 eghab = rast("data/wetland_east.tif")
 
 # Colors
@@ -375,7 +385,7 @@ cols[setdiff(cats, names(cols))] = "gray"  # default for missing categories
 par(mar = c(4, 4, 2, 6))
 
 # Plot
-plot(eghab, legend = FALSE)
+plot(eghab,col=cividis(5,direction=-1), legend = FALSE)
 plot(areas, col = cols[areas$category], add = TRUE)
 legend("topright", legend = names(cols), fill = cols, title = "Category", xpd = TRUE, bty = "n")
     
@@ -384,9 +394,10 @@ legend("topright", legend = names(cols), fill = cols, title = "Category", xpd = 
 
 Now you can explore this shapefile in your preferred GIS software. As mentioned above, in the **ZIP** folder you downloaded, you will find a [QGIS project](https://github.com/condatis/Ctraining_inR_25/tree/main/R%20Example), where you can visualise all the rasters and shapefiles we obtained in this exercise.
 
-## Other directions
+## Other directions - optional extra
 
 If you wish, you can repeat the analyses above using other directions. In the data folder, you will find the rasters for the Northwest-Southeast (NW_SE) and Southeast-East(SE_E) sources and targets.
+The code in this part is somewhat trickier than the code above. The trickiness doesn't matter if you simply 'play' what we have written and see what happens. But it matters if you wanted to adapt the code for your own example landscape. 
 
 You can change the input data in the [Sources and targets data] section, for example:
 
@@ -403,7 +414,7 @@ dirnow = 'NW_SE'
 
 These are the directions available in this excersice:
 
-```{r STothers, echo=FALSE}
+```{r STothers, echo=TRUE}
 library(terra)
 
 eghab = rast("data/wetland_east.tif")
@@ -411,24 +422,24 @@ direction = rast("data/east_W_E.tif")
 direction2 = rast("data/east_NW_SE.tif")
 direction3 = rast("data/east_SW_E.tif")
 
-plot(eghab, legend = FALSE)
+plot(eghab,col=cividis(5,direction=-1), legend = FALSE)
 plot(direction, add=TRUE, legend = FALSE)
 plot(direction2, add=TRUE, col =c('red','blue'), legend = FALSE)
 plot(direction3, add=TRUE, col =c('orange','darkgreen'), legend = FALSE)
 ```
 
-You will have to [Convert rasters to points] for these new directions and [Run Condatis] analyses with them.
+We have not provided you with code to compile these three directions into a loop and run them all. You would have to [Convert rasters to points] for these new directions and [Run Condatis] analyses with them. We'd only recommend doing this if you are practised in using R for loops.
 
 ## Multidirectional search areas
 
-It is possible to combine the bottlenecks of multiple directions by combining the shapefiles of the [Bottleneck lines] (named *botlines*) for the multiple directions and apply the `zones_by_score_range` function (as described in [Search areas]). Below are the 'search areas' considering the three directions of movement for this wetland landscape.
+It is possible to combine the bottlenecks of multiple directions by appending the shapefiles of the [Bottleneck lines] (named *botlines*) for the multiple directions and apply the `zones_by_score_range` function (as described in [Search areas]). We have not provided code for this, but we have saved the end result in the QGIS_project folder. Here is a way to plot the 'search areas' considering the three directions of movement for this wetland landscape.
 
 ```{r allareas, echo=FALSE, message=FALSE, warning=FALSE}
 library(sf)
 library(terra)
 
 # Load data
-areas = st_read("area/Wetland_East_combined_bottleneck_areas.shp", quiet = TRUE)
+areas = st_read("QGIS_project/Wetland_East_combined_bottleneck_areas.shp", quiet = TRUE)
 eghab = rast("data/wetland_east.tif")
 
 # Colors
@@ -440,7 +451,7 @@ cols[setdiff(cats, names(cols))] = "gray"  # default for missing categories
 par(mar = c(4, 4, 2, 6))
 
 # Plot
-plot(eghab, legend = FALSE)
+plot(eghab,col=cividis(5,direction=-1), legend = FALSE, main = "Search areas from three directions combined")
 plot(areas, col = cols[areas$category], add = TRUE)
 legend("topright", legend = names(cols), fill = cols, title = "Category", xpd = TRUE, bty = "n")
     
